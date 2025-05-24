@@ -1,0 +1,472 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto & Economic Events</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
+      transition: all 0.3s;
+    }
+    body.dark-mode {
+      background: #222;
+      color: #fff;
+    }
+    .pre-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #f1f1f1;
+    }
+    .pre-header.dark-mode {
+      background: #333;
+    }
+    .logo img {
+      height: 40px;
+    }
+    .dark-mode-toggle {
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
+      background: #e0e0e0;
+      gap: 20px;
+    }
+    .header.dark-mode {
+      background: #444;
+    }
+    .event {
+      cursor: pointer;
+      text-align: center;
+      flex: 1;
+    }
+    .event-time {
+      color: green;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .nav {
+      float: left;
+      background: #f1f1f1;
+      padding: 15px;
+      min-height: calc(100vh - 110px);
+      width: fit-content;
+    }
+    .nav.dark-mode {
+      background: #333;
+    }
+    .nav-item {
+      margin: 15px 0;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .content {
+      margin-left: 10px;
+      padding: 20px;
+      overflow: auto;
+    }
+    .summary-list, .crypto-list {
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .summary-item, .crypto-item {
+      border-bottom: 1px solid #ccc;
+      padding: 15px 0;
+    }
+    .form-container {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #f9f9f9;
+      color: #000;
+    }
+    .form-container.dark-mode {
+      background: #333;
+      border-color: #555;
+      color: #fff;
+    }
+    .form-container h3 {
+      margin-top: 0;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+      resize: vertical;
+      background: #fff;
+      color: #000;
+    }
+    .form-container.dark-mode textarea {
+      background: #444;
+      color: #fff;
+      border-color: #666;
+    }
+    .timestamp {
+      font-size: 0.8em;
+      color: #666;
+      margin-top: 5px;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .modal-content.dark-mode {
+      background: #333;
+      color: #fff;
+    }
+    .modal-content button {
+      margin: 10px;
+      padding: 8px 16px;
+      background: #f1f1f1;
+      color: #000;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .modal-content.dark-mode button {
+      background: #444;
+      color: #fff;
+      border-color: #666;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="pre-header">
+    <div class="logo">
+      <img src="https://via.placeholder.com/100x40?text=Logo" alt="Logo">
+    </div>
+    <i class="fas fa-lightbulb dark-mode-toggle" onclick="toggleDarkMode()"></i>
+  </div>
+  <div class="header">
+    <div class="event" onclick="showSummary('cpi')">
+      <div>CPI</div>
+      <div class="event-time" id="cpi-time"></div>
+      <div id="cpi-countdown"></div>
+    </div>
+    <div class="event" onclick="showSummary('ppi')">
+      <div>PPI</div>
+      <div class="event-time" id="ppi-time"></div>
+      <div id="ppi-countdown"></div>
+    </div>
+    <div class="event" onclick="showSummary('nfp')">
+      <div>Non-farm Payrolls</div>
+      <div class="event-time" id="nfp-time"></div>
+      <div id="nfp-countdown"></div>
+    </div>
+    <div class="event" onclick="showSummary('fomc')">
+      <div>FOMC</div>
+      <div class="event-time" id="fomc-time"></div>
+      <div id="fomc-countdown"></div>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-item" onclick="showCrypto('btc')">BTC</div>
+    <div class="nav-item" onclick="showCrypto('pepe')">PEPE</div>
+    <div class="nav-item" onclick="showCrypto('xrp')">XRP</div>
+    <div class="nav-item" onclick="showCrypto('sol')">SOL</div>
+    <div class="nav-item" onclick="showCrypto('eth')">ETH</div>
+    <div class="nav-item" onclick="showAddCryptoForm()">
+      <i class="fas fa-plus"></i> Add
+    </div>
+  </div>
+  <div class="content">
+    <div id="main-content"></div>
+    <div id="delete-modal" class="modal hidden">
+      <div class="modal-content">
+        <p>Delete Entry?</p>
+        <button id="confirm-delete">Yes</button>
+        <button onclick="closeModal()">No</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      document.querySelector('.pre-header').classList.toggle('dark-mode');
+      document.querySelector('.header').classList.toggle('dark-mode');
+      document.querySelector('.nav').classList.toggle('dark-mode');
+      document.querySelectorAll('.form-container').forEach(el => el.classList.toggle('dark-mode'));
+      document.querySelectorAll('.modal-content').forEach(el => el.classList.toggle('dark-mode'));
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+    if (localStorage.getItem('darkMode') === 'true') toggleDarkMode();
+
+    // Event Countdowns (Placeholder dates, replace with actual)
+    const events = {
+      cpi: new Date('2025-06-10T08:30:00-07:00'),
+      ppi: new Date('2025-06-12T08:30:00-07:00'),
+      nfp: new Date('2025-06-06T08:30:00-07:00'),
+      fomc: new Date('2025-06-18T14:00:00-07:00')
+    };
+
+    function updateCountdowns() {
+      for (let event in events) {
+        const now = new Date();
+        const diff = events[event] - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById(`${event}-time`).textContent = events[event].toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          timeZone: 'America/Los_Angeles',
+          hour12: true
+        });
+        document.getElementById(`${event}-countdown`).textContent = `${days}d ${hours}h ${minutes}m`;
+      }
+    }
+    setInterval(updateCountdowns, 60000);
+    updateCountdowns();
+
+    // Delete Confirmation Modal
+    function showDeleteModal(callback) {
+      const modal = document.getElementById('delete-modal');
+      const confirmButton = document.getElementById('confirm-delete');
+      modal.classList.remove('hidden');
+      confirmButton.onclick = () => {
+        callback();
+        closeModal();
+      };
+    }
+
+    function closeModal() {
+      document.getElementById('delete-modal').classList.add('hidden');
+    }
+
+    // Summaries
+    let summaries = JSON.parse(localStorage.getItem('summaries')) || {
+      cpi: [], ppi: [], nfp: [], fomc: []
+    };
+
+    function showSummary(event) {
+      const content = document.getElementById('main-content');
+      content.innerHTML = `
+        <h2>${event.toUpperCase()} Summaries</h2>
+        <div class="summary-list" id="${event}-summaries"></div>
+        <div class="form-container">
+          <h3>Add/Edit Entry</h3>
+          <textarea id="${event}-summary-text"></textarea>
+          <button onclick="saveSummary('${event}')">Save</button>
+        </div>
+      `;
+      renderSummaries(event);
+    }
+
+    function renderSummaries(event) {
+      const list = document.getElementById(`${event}-summaries`);
+      list.innerHTML = summaries[event].map((s, i) => `
+        <div class="summary-item">
+          <p>${s.text}</p>
+          <div class="timestamp">Added: ${s.timestamp}</div>
+          <button onclick="editSummary('${event}', ${i})">Edit</button>
+          <button onclick="confirmDeleteSummary('${event}', ${i})">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function saveSummary(event) {
+      const text = document.getElementById(`${event}-summary-text`).value;
+      if (text) {
+        const timestamp = new Date().toLocaleString('en-US', {
+          timeZone: 'America/Los_Angeles',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          hour12: true
+        });
+        summaries[event].unshift({ text, timestamp });
+        localStorage.setItem('summaries', JSON.stringify(summaries));
+        renderSummaries(event);
+        document.getElementById(`${event}-summary-text`).value = '';
+      }
+    }
+
+    function editSummary(event, index) {
+      document.getElementById(`${event}-summary-text`).value = summaries[event][index].text;
+      summaries[event].splice(index, 1);
+      localStorage.setItem('summaries', JSON.stringify(summaries));
+      renderSummaries(event);
+    }
+
+    function confirmDeleteSummary(event, index) {
+      showDeleteModal(() => deleteSummary(event, index));
+    }
+
+    function deleteSummary(event, index) {
+      summaries[event].splice(index, 1);
+      localStorage.setItem('summaries', JSON.stringify(summaries));
+      renderSummaries(event);
+    }
+
+    // Crypto Pages
+    let cryptos = JSON.parse(localStorage.getItem('cryptos')) || {
+      btc: [], pepe: [], xrp: [], sol: [], eth: []
+    };
+
+    function showCrypto(ticker) {
+      const content = document.getElementById('main-content');
+      content.innerHTML = `
+        <h2>${ticker.toUpperCase()} Page</h2>
+        <div class="crypto-list" id="${ticker}-entries"></div>
+        <div class="form-container">
+          <h3>Add/Edit Entry</h3>
+          <textarea id="${ticker}-entry-text"></textarea>
+          <button onclick="saveCryptoEntry('${ticker}')">Save</button>
+        </div>
+      `;
+      renderCryptoEntries(ticker);
+    }
+
+    function renderCryptoEntries(ticker) {
+      const list = document.getElementById(`${ticker}-entries`);
+      list.innerHTML = cryptos[ticker].map((e, i) => `
+        <div class="crypto-item">
+          <p>${e.text}</p>
+          <div class="timestamp">Added: ${e.timestamp}</div>
+          <button onclick="editCryptoEntry('${ticker}', ${i})">Edit</button>
+          <button onclick="confirmDeleteCryptoEntry('${ticker}', ${i})">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function saveCryptoEntry(ticker) {
+      const text = document.getElementById(`${ticker}-entry-text`).value;
+      if (text) {
+        const timestamp = new Date().toLocaleString('en-US', {
+          timeZone: 'America/Los_Angeles',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          hour12: true
+        });
+        cryptos[ticker].unshift({ text, timestamp });
+        localStorage.setItem('cryptos', JSON.stringify(cryptos));
+        renderCryptoEntries(ticker);
+        document.getElementById(`${ticker}-entry-text`).value = '';
+      }
+    }
+
+    function editCryptoEntry(ticker, index) {
+      document.getElementById(`${ticker}-entry-text`).value = cryptos[ticker][index].text;
+      cryptos[ticker].splice(index, 1);
+      localStorage.setItem('cryptos', JSON.stringify(cryptos));
+      renderCryptoEntries(ticker);
+    }
+
+    function confirmDeleteCryptoEntry(ticker, index) {
+      showDeleteModal(() => deleteCryptoEntry(ticker, index));
+    }
+
+    function deleteCryptoEntry(ticker, index) {
+      cryptos[ticker].splice(index, 1);
+      localStorage.setItem('cryptos', JSON.stringify(cryptos));
+      renderCryptoEntries(ticker);
+    }
+
+    function showAddCryptoForm() {
+      const content = document.getElementById('main-content');
+      content.innerHTML = `
+        <h2>Add New Cryptocurrency</h2>
+        <div class="form-container">
+          <input type="text" id="new-crypto-ticker" placeholder="Enter ticker (e.g., ADA)">
+          <button onclick="addNewCrypto()">Add</button>
+        </div>
+      `;
+    }
+
+    function addNewCrypto() {
+      const ticker = document.getElementById('new-crypto-ticker').value.toLowerCase();
+      if (ticker && !cryptos[ticker]) {
+        cryptos[ticker] = [];
+        localStorage.setItem('cryptos', JSON.stringify(cryptos));
+        const nav = document.querySelector('.nav');
+        const newItem = document.createElement('div');
+        newItem.className = 'nav-item';
+        newItem.onclick = () => showCrypto(ticker);
+        newItem.textContent = ticker.toUpperCase();
+        nav.insertBefore(newItem, nav.lastElementChild);
+      }
+    }
+  </script>
+</body>
+</html>
