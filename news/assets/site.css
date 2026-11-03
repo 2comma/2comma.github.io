@@ -1,0 +1,46 @@
+/* Additions on top of Boa's styles.css (loaded first; all values use her tokens). Keep layout-only; restyle via styles.css. */
+.skip{position:absolute;left:-999px}.skip:focus{left:var(--s2);top:var(--s2);background:var(--amber);color:var(--on-fill);padding:var(--s2);z-index:99}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+h1:focus,main:focus{outline:none}
+.mt{margin-top:var(--s6)}.mt2{margin-top:var(--s8)}.mt2 a:hover{color:var(--brand)}
+.list li{cursor:default}.list .hl:hover{text-decoration:underline;text-decoration-color:var(--day)}
+.list li .sample{margin-left:var(--s2);vertical-align:2px}
+.list.sm li{font-size:var(--fs-md);padding:var(--s3) 0}
+.cat{font:600 var(--fs-xs) var(--font-head);text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-right:var(--s1)}
+.list li{color:var(--text)}.list li:before{color:var(--day)}
+.pager{display:flex;gap:var(--s3);margin:0 0 var(--s5);flex-wrap:wrap}.pager.wl{margin-top:var(--s5)}
+.pg,.zoombar button{font:600 var(--fs-sm) var(--font-head);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);background:var(--surface);min-height:44px;display:inline-flex;align-items:center;cursor:pointer}
+.pg.off{color:var(--dim);opacity:.5}
+.zoombar{display:flex;gap:var(--s2);justify-content:flex-end;padding-top:var(--s3)}.zoombar[hidden]{display:none}
+
+.earlier{display:grid;gap:var(--s4)}@media(min-width:600px){.earlier{grid-template-columns:repeat(2,1fr)}}
+.ecard{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--day);border-radius:var(--r-md);padding:var(--s4)}
+.ehead{display:flex;align-items:baseline;gap:var(--s2)}.ehead .w{font:700 var(--fs-sm) var(--font-head);color:var(--day);letter-spacing:2px;text-transform:uppercase}.ehead .n{font:800 var(--fs-xl) var(--font-head)}
+.note{color:var(--dim);font-size:var(--fs-sm);margin:-8px 0 var(--s3)}
+.month a.c{display:block}.month a.c:hover{background:color-mix(in srgb,var(--day) 18%,var(--surface))}
+.month .c.today{outline:2px solid var(--amber);outline-offset:-2px}
+.item{max-width:var(--modal)}.item h1{font-size:var(--fs-xl);margin-top:var(--s4)}
+.writeup a,.refs a{color:var(--day);text-decoration:underline}.writeup blockquote{border-left:3px solid var(--day);margin:0;padding-left:var(--s4);color:var(--muted)}
+.refs{padding-left:var(--s5)}.refs li{margin:var(--s2) 0}
+.refs .pub{display:block;font:400 var(--fs-xs) var(--font-head);color:var(--dim)}
+.modal .box{position:relative}.modal .perma{font:600 var(--fs-xs) var(--font-head);color:var(--dim);margin-top:var(--s5)}
+body.locked{overflow:hidden}
+.subscribe h2{font-size:var(--fs-lg);color:var(--text)}.sub-placeholder{border:1px dashed var(--dim);border-radius:var(--r-md);padding:var(--s4);text-align:center;font:400 var(--fs-sm) var(--font-head)}
+.nfa strong{color:var(--amber)}
+.card-img{height:auto}
+/* v2 */
+:root{--empty-opacity:.4;--empty-filter:saturate(0)}
+.js .edpanel[data-off]{display:none}
+.month .c.empty{filter:var(--empty-filter)}
+.dcard.empty .chip{border-color:var(--line);color:var(--dim)}
+.top10 .meta{display:flex;gap:var(--s2);margin-top:var(--s2);flex-wrap:wrap}
+
+/* sister-site link */
+.hdr-tools{display:flex;align-items:center;gap:8px}
+.sister{display:inline-flex;align-items:center;flex:none;line-height:0;border-radius:7px}
+.sister img{width:32px;height:32px;border-radius:7px;display:block}
+.sister:hover img{opacity:.85}
+.sister:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+/* r2: sister mark matches the header .mark (32px) at all widths */
+
