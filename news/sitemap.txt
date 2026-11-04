@@ -80,6 +80,7 @@ us/day/2026-10-29.html
 us/day/2026-10-30.html
 us/day/2026-10-31.html
 us/day/2026-11-02.html
+us/day/2026-11-04.html
 us/week/2026-W43.html
 us/week/2026-W44.html
 us/week/2026-W45.html
@@ -131,6 +132,7 @@ politics/day/2026-10-30.html
 politics/day/2026-10-31.html
 politics/day/2026-11-01.html
 politics/day/2026-11-02.html
+politics/day/2026-11-04.html
 politics/week/2026-W43.html
 politics/week/2026-W44.html
 politics/week/2026-W45.html
@@ -162,6 +164,7 @@ entertainment/day/2026-10-30.html
 entertainment/day/2026-10-31.html
 entertainment/day/2026-11-01.html
 entertainment/day/2026-11-02.html
+entertainment/day/2026-11-04.html
 entertainment/week/2026-W43.html
 entertainment/week/2026-W44.html
 entertainment/week/2026-W45.html
@@ -526,6 +529,16 @@ item/2026-11-04-am-2.html
 item/2026-11-04-am-3.html
 item/2026-11-04-am-4.html
 item/2026-11-04-am-5.html
+item/2026-11-04-entertainment-1.html
+item/2026-11-04-entertainment-2.html
+item/2026-11-04-entertainment-3.html
+item/2026-11-04-politics-1.html
+item/2026-11-04-politics-2.html
+item/2026-11-04-politics-3.html
+item/2026-11-04-politics-4.html
+item/2026-11-04-us-1.html
+item/2026-11-04-us-2.html
+item/2026-11-04-us-3.html
 zh-hant/index.html
 zh-hant/day/2026-10-21.html
 zh-hant/day/2026-10-22.html
@@ -608,6 +621,7 @@ zh-hant/us/day/2026-10-29.html
 zh-hant/us/day/2026-10-30.html
 zh-hant/us/day/2026-10-31.html
 zh-hant/us/day/2026-11-02.html
+zh-hant/us/day/2026-11-04.html
 zh-hant/us/week/2026-W43.html
 zh-hant/us/week/2026-W44.html
 zh-hant/us/week/2026-W45.html
@@ -659,6 +673,7 @@ zh-hant/politics/day/2026-10-30.html
 zh-hant/politics/day/2026-10-31.html
 zh-hant/politics/day/2026-11-01.html
 zh-hant/politics/day/2026-11-02.html
+zh-hant/politics/day/2026-11-04.html
 zh-hant/politics/week/2026-W43.html
 zh-hant/politics/week/2026-W44.html
 zh-hant/politics/week/2026-W45.html
@@ -690,6 +705,7 @@ zh-hant/entertainment/day/2026-10-30.html
 zh-hant/entertainment/day/2026-10-31.html
 zh-hant/entertainment/day/2026-11-01.html
 zh-hant/entertainment/day/2026-11-02.html
+zh-hant/entertainment/day/2026-11-04.html
 zh-hant/entertainment/week/2026-W43.html
 zh-hant/entertainment/week/2026-W44.html
 zh-hant/entertainment/week/2026-W45.html
@@ -1054,6 +1070,16 @@ zh-hant/item/2026-11-04-am-2.html
 zh-hant/item/2026-11-04-am-3.html
 zh-hant/item/2026-11-04-am-4.html
 zh-hant/item/2026-11-04-am-5.html
+zh-hant/item/2026-11-04-entertainment-1.html
+zh-hant/item/2026-11-04-entertainment-2.html
+zh-hant/item/2026-11-04-entertainment-3.html
+zh-hant/item/2026-11-04-politics-1.html
+zh-hant/item/2026-11-04-politics-2.html
+zh-hant/item/2026-11-04-politics-3.html
+zh-hant/item/2026-11-04-politics-4.html
+zh-hant/item/2026-11-04-us-1.html
+zh-hant/item/2026-11-04-us-2.html
+zh-hant/item/2026-11-04-us-3.html
 zh-hans/index.html
 zh-hans/day/2026-10-21.html
 zh-hans/day/2026-10-22.html
@@ -1136,6 +1162,7 @@ zh-hans/us/day/2026-10-29.html
 zh-hans/us/day/2026-10-30.html
 zh-hans/us/day/2026-10-31.html
 zh-hans/us/day/2026-11-02.html
+zh-hans/us/day/2026-11-04.html
 zh-hans/us/week/2026-W43.html
 zh-hans/us/week/2026-W44.html
 zh-hans/us/week/2026-W45.html
@@ -1187,6 +1214,7 @@ zh-hans/politics/day/2026-10-30.html
 zh-hans/politics/day/2026-10-31.html
 zh-hans/politics/day/2026-11-01.html
 zh-hans/politics/day/2026-11-02.html
+zh-hans/politics/day/2026-11-04.html
 zh-hans/politics/week/2026-W43.html
 zh-hans/politics/week/2026-W44.html
 zh-hans/politics/week/2026-W45.html
@@ -1218,6 +1246,7 @@ zh-hans/entertainment/day/2026-10-30.html
 zh-hans/entertainment/day/2026-10-31.html
 zh-hans/entertainment/day/2026-11-01.html
 zh-hans/entertainment/day/2026-11-02.html
+zh-hans/entertainment/day/2026-11-04.html
 zh-hans/entertainment/week/2026-W43.html
 zh-hans/entertainment/week/2026-W44.html
 zh-hans/entertainment/week/2026-W45.html
@@ -1582,3 +1611,13 @@ zh-hans/item/2026-11-04-am-2.html
 zh-hans/item/2026-11-04-am-3.html
 zh-hans/item/2026-11-04-am-4.html
 zh-hans/item/2026-11-04-am-5.html
+zh-hans/item/2026-11-04-entertainment-1.html
+zh-hans/item/2026-11-04-entertainment-2.html
+zh-hans/item/2026-11-04-entertainment-3.html
+zh-hans/item/2026-11-04-politics-1.html
+zh-hans/item/2026-11-04-politics-2.html
+zh-hans/item/2026-11-04-politics-3.html
+zh-hans/item/2026-11-04-politics-4.html
+zh-hans/item/2026-11-04-us-1.html
+zh-hans/item/2026-11-04-us-2.html
+zh-hans/item/2026-11-04-us-3.html
