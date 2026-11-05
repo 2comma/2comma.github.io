@@ -640,9 +640,16 @@ class CanonicalTests(unittest.TestCase):
         git("commit", "-m", "base", cwd=clone)
         git("push", "origin", "HEAD:main", cwd=clone)
 
+        from hub_links import rewrite_root_hub_links
+
         stage = self.tmp / "root-stage"
+        before = (YNWA_FIXTURE / "index.html").read_bytes()
         prepare_root_hub(str(YNWA_FIXTURE), str(stage))
-        self.assertEqual((stage / "index.html").read_bytes(), (YNWA_FIXTURE / "index.html").read_bytes())
+        self.assertEqual((YNWA_FIXTURE / "index.html").read_bytes(), before)
+        self.assertEqual(
+            (stage / "index.html").read_text(encoding="utf-8"),
+            rewrite_root_hub_links(before.decode("utf-8")),
+        )
         self.assertEqual(
             (stage / "avatars" / "gojo.png").read_bytes(),
             (YNWA_FIXTURE / "avatars" / "gojo.png").read_bytes(),
@@ -650,9 +657,11 @@ class CanonicalTests(unittest.TestCase):
         release_root(str(stage), str(clone), remote="origin", branch="main")
         self._assert_unrelated_survived(clone, unrelated)
         self.assertNotIn("icons/retired.svg", git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone))
+        from hub_links import rewrite_root_hub_links
+
         self.assertEqual(
             git("show", "origin/main:index.html", cwd=clone),
-            (YNWA_FIXTURE / "index.html").read_text(encoding="utf-8"),
+            rewrite_root_hub_links((YNWA_FIXTURE / "index.html").read_text(encoding="utf-8")),
         )
         self.assertEqual(git("show", "origin/main:ynwa/index.html", cwd=clone).encode("utf-8"), REDIRECT_HTML)
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
@@ -669,6 +678,12 @@ class CanonicalTests(unittest.TestCase):
         release_root(str(later), str(clone), remote="origin", branch="main")
         updated = git("show", "origin/main:index.html", cwd=clone)
         self.assertIn("later", updated)
+        self.assertIn('href="/team/"', updated)
+        self.assertIn('href="/news/"', updated)
+        self.assertIn('href="/read/"', updated)
+        self.assertIn('href="/trade/"', updated)
+        self.assertIn('href="/lfc/"', updated)
+        self.assertNotIn("https://twocommanews.com", updated)
         self.assertIn("icons/prw.svg", git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone))
         self._assert_unrelated_survived(clone, unrelated)
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
@@ -692,6 +707,41 @@ class CanonicalTests(unittest.TestCase):
             )
             self.assertEqual(published, data, rel)
             self.assertEqual(clone.joinpath(*rel.split("/")).read_bytes(), data, rel)
+
+    def test_root_hub_maps_five_sites_without_changing_canonical_source(self) -> None:
+        from hub_links import map_mirror_url, rewrite_root_hub_links
+        from ynwa_canonical import package_dist
+        from ynwa_prepare import prepare_root_hub
+
+        source = (YNWA_FIXTURE / "index.html").read_bytes()
+        self.assertEqual(
+            map_mirror_url("https://twocommanews.com/zh-hans/day/2026-11-05.html"),
+            "/news/zh-hans/day/2026-11-05.html",
+        )
+        self.assertEqual(map_mirror_url("https://team.twocommanews.com"), "/team/")
+        self.assertEqual(map_mirror_url("https://proprulewatch.com"), "https://proprulewatch.com")
+        stage = self.tmp / "root"
+        prepare_root_hub(str(YNWA_FIXTURE), str(stage))
+        self.assertEqual((YNWA_FIXTURE / "index.html").read_bytes(), source)
+        page = (stage / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(page, rewrite_root_hub_links(source.decode("utf-8")))
+        for local in ("/team/", "/news/", "/read/", "/trade/", "/lfc/"):
+            self.assertIn(f'href="{local}"', page)
+        self.assertNotIn("https://team.twocommanews.com", page)
+        self.assertNotIn("https://twocommanews.com", page)
+        self.assertNotIn("https://read.twocommanews.com", page)
+        self.assertNotIn("https://trade.twocommanews.com", page)
+        self.assertNotIn("https://lfc.twocommanews.com", page)
+        self.assertIn('href="https://proprulewatch.com"', page)
+        self.assertIn('href="https://journalcompare.com"', page)
+        for rel in ("favicon.svg", "team-logo.svg", "avatars/gojo.png", "icons/tcr.svg", "icons/lfc.png"):
+            self.assertEqual((stage / rel).read_bytes(), (YNWA_FIXTURE / rel).read_bytes(), rel)
+        packaged = package_dist(str(YNWA_FIXTURE), str(self.tmp / "canonical.zip"))
+        self.assertIn("not deployed", packaged)
+        import zipfile
+        with zipfile.ZipFile(self.tmp / "canonical.zip") as archive:
+            packed = archive.read("index.html")
+        self.assertEqual(packed, source)
 
     def test_baseline_digest_is_the_recovered_zip(self) -> None:
         from ynwa_canonical import load_baseline
@@ -894,9 +944,12 @@ class CanonicalTests(unittest.TestCase):
         )
         self.assertIn("site root", mirrored.stdout)
         self.assertIn("was not replaced with a duplicate", mirrored.stdout)
+        from hub_links import rewrite_root_hub_links
+
         root_page = git("show", "origin/main:index.html", cwd=clone)
         source_page = (YNWA_FIXTURE / "index.html").read_text(encoding="utf-8")
-        self.assertEqual(root_page, source_page)
+        self.assertIn('href="https://twocommanews.com"', source_page)
+        self.assertEqual(root_page, rewrite_root_hub_links(source_page))
         self.assertIn('src="/avatars/gojo.png"', root_page)
         self.assertNotIn('src="/ynwa/avatars/gojo.png"', root_page)
         remote_png = subprocess.check_output(
@@ -937,6 +990,10 @@ class CanonicalTests(unittest.TestCase):
         mirror_confirmed(str(marker), str(clone))
         updated = git("show", "origin/main:index.html", cwd=clone)
         self.assertIn("hub-update", updated)
+        for local in ('href="/team/"', 'href="/news/"', 'href="/read/"', 'href="/trade/"', 'href="/lfc/"'):
+            self.assertIn(local, updated)
+        self.assertNotIn('href="https://twocommanews.com"', updated)
+        self.assertIn('href="https://proprulewatch.com"', updated)
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
         self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
         self.assertEqual(git("show", "origin/main:team/keep.txt", cwd=clone), "team\n")

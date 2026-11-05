@@ -113,7 +113,15 @@ def prepare_root_hub(artifact: str, out_dir: str) -> list[str]:
     if "index.html" not in kept:
         raise MirrorError("YNWA artifact has no index.html. Nothing was published.")
     validate_canonical_references(kept)
-    write_tree(out_dir, kept)
+    from hub_links import rewrite_root_hub_links
+
+    linked: dict[str, bytes] = {}
+    for rel, data in kept.items():
+        if rel.lower().endswith(TEXT_SUFFIXES):
+            linked[rel] = rewrite_root_hub_links(data.decode("utf-8")).encode("utf-8")
+        else:
+            linked[rel] = data
+    write_tree(out_dir, linked)
     notes = [f"public-mirrors: prepared root hub ({len(kept)} files)"]
     if omitted:
         notes.append("omitted deploy metadata: " + ", ".join(omitted))
