@@ -153,6 +153,7 @@ health/day/2026-10-29.html
 health/day/2026-10-30.html
 health/day/2026-10-31.html
 health/day/2026-11-02.html
+health/day/2026-11-05.html
 health/week/2026-W43.html
 health/week/2026-W44.html
 health/week/2026-W45.html
@@ -184,6 +185,7 @@ travel/day/2026-10-28.html
 travel/day/2026-10-29.html
 travel/day/2026-10-30.html
 travel/day/2026-11-02.html
+travel/day/2026-11-05.html
 travel/week/2026-W43.html
 travel/week/2026-W44.html
 travel/week/2026-W45.html
@@ -559,6 +561,12 @@ item/2026-11-05-asia-2.html
 item/2026-11-05-asia-3.html
 item/2026-11-05-asia-4.html
 item/2026-11-05-asia-5.html
+item/2026-11-05-health-1.html
+item/2026-11-05-health-2.html
+item/2026-11-05-health-3.html
+item/2026-11-05-travel-1.html
+item/2026-11-05-travel-2.html
+item/2026-11-05-travel-3.html
 item/2026-11-05-world-1.html
 item/2026-11-05-world-2.html
 item/2026-11-05-world-3.html
@@ -718,6 +726,7 @@ zh-hant/health/day/2026-10-29.html
 zh-hant/health/day/2026-10-30.html
 zh-hant/health/day/2026-10-31.html
 zh-hant/health/day/2026-11-02.html
+zh-hant/health/day/2026-11-05.html
 zh-hant/health/week/2026-W43.html
 zh-hant/health/week/2026-W44.html
 zh-hant/health/week/2026-W45.html
@@ -749,6 +758,7 @@ zh-hant/travel/day/2026-10-28.html
 zh-hant/travel/day/2026-10-29.html
 zh-hant/travel/day/2026-10-30.html
 zh-hant/travel/day/2026-11-02.html
+zh-hant/travel/day/2026-11-05.html
 zh-hant/travel/week/2026-W43.html
 zh-hant/travel/week/2026-W44.html
 zh-hant/travel/week/2026-W45.html
@@ -1124,6 +1134,12 @@ zh-hant/item/2026-11-05-asia-2.html
 zh-hant/item/2026-11-05-asia-3.html
 zh-hant/item/2026-11-05-asia-4.html
 zh-hant/item/2026-11-05-asia-5.html
+zh-hant/item/2026-11-05-health-1.html
+zh-hant/item/2026-11-05-health-2.html
+zh-hant/item/2026-11-05-health-3.html
+zh-hant/item/2026-11-05-travel-1.html
+zh-hant/item/2026-11-05-travel-2.html
+zh-hant/item/2026-11-05-travel-3.html
 zh-hant/item/2026-11-05-world-1.html
 zh-hant/item/2026-11-05-world-2.html
 zh-hant/item/2026-11-05-world-3.html
@@ -1283,6 +1299,7 @@ zh-hans/health/day/2026-10-29.html
 zh-hans/health/day/2026-10-30.html
 zh-hans/health/day/2026-10-31.html
 zh-hans/health/day/2026-11-02.html
+zh-hans/health/day/2026-11-05.html
 zh-hans/health/week/2026-W43.html
 zh-hans/health/week/2026-W44.html
 zh-hans/health/week/2026-W45.html
@@ -1314,6 +1331,7 @@ zh-hans/travel/day/2026-10-28.html
 zh-hans/travel/day/2026-10-29.html
 zh-hans/travel/day/2026-10-30.html
 zh-hans/travel/day/2026-11-02.html
+zh-hans/travel/day/2026-11-05.html
 zh-hans/travel/week/2026-W43.html
 zh-hans/travel/week/2026-W44.html
 zh-hans/travel/week/2026-W45.html
@@ -1689,6 +1707,12 @@ zh-hans/item/2026-11-05-asia-2.html
 zh-hans/item/2026-11-05-asia-3.html
 zh-hans/item/2026-11-05-asia-4.html
 zh-hans/item/2026-11-05-asia-5.html
+zh-hans/item/2026-11-05-health-1.html
+zh-hans/item/2026-11-05-health-2.html
+zh-hans/item/2026-11-05-health-3.html
+zh-hans/item/2026-11-05-travel-1.html
+zh-hans/item/2026-11-05-travel-2.html
+zh-hans/item/2026-11-05-travel-3.html
 zh-hans/item/2026-11-05-world-1.html
 zh-hans/item/2026-11-05-world-2.html
 zh-hans/item/2026-11-05-world-3.html
