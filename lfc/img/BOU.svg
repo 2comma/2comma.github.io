@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="128" height="128">
+ <path d="M10 14 H90 V62 L50 94 L10 62 Z" fill="none" stroke="#0B0F14" stroke-width="10" stroke-linejoin="round"/><path d="M10 14 H90 V62 L50 94 L10 62 Z" fill="#DA291C" stroke="#000000" stroke-width="6" stroke-linejoin="round"/>
+ <text x="50" y="56" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700" font-size="30" textLength="54" lengthAdjust="spacingAndGlyphs" fill="#FFFFFF">BOU</text>
+</svg>
