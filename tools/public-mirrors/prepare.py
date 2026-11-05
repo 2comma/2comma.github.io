@@ -11,6 +11,7 @@ import argparse
 import sys
 
 from common import MirrorError, assert_target
+from site_boundaries import block_reason
 from team_prepare import prepare_team
 from ynwa_prepare import prepare_ynwa
 
@@ -18,6 +19,9 @@ from ynwa_prepare import prepare_ynwa
 def prepare(target: str, artifact: str, out_dir: str) -> list[str]:
     if artifact.startswith(("http://", "https://", "file://")):
         raise MirrorError("refusing a URL artifact. Pass a local file or directory.")
+    reason = block_reason(target)
+    if reason:
+        raise MirrorError(reason + " Nothing was published.")
     subdir = assert_target(target)
     if subdir == "ynwa":
         return prepare_ynwa(artifact, out_dir)
