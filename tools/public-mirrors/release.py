@@ -20,8 +20,8 @@ from datetime import datetime
 from pathlib import Path
 
 from common import MirrorError, assert_target, redact
-from sensitive import scan_bytes, scan_text
-from ynwa_prepare import allowed, scan_payload
+from sensitive import scan_text
+from ynwa_redirect import assert_redirect_tree
 
 LABELS = {
     "ynwa": "YNWA mirror",
@@ -203,17 +203,7 @@ def _read_staging(target: str, staging: Path) -> dict[str, bytes]:
         text = files["index.html"].decode("utf-8")
         scan_text(text, "team/index.html")
         return files
-    if ".nojekyll" in files and files[".nojekyll"] != b"":
-        raise MirrorError("ynwa .nojekyll must be empty")
-    for rel, data in files.items():
-        if rel == ".nojekyll":
-            continue
-        if not allowed(rel):
-            raise MirrorError(f"staging path is not on the YNWA allowlist: {rel}")
-        scan_payload(rel, data)
-        scan_bytes(data, rel)
-    if "index.html" not in files:
-        raise MirrorError("ynwa staging has no index.html")
+    assert_redirect_tree(files)
     return files
 
 

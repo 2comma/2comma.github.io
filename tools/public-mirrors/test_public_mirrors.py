@@ -386,21 +386,21 @@ class ReleaseTests(unittest.TestCase):
 
     def test_rebase_conflict_does_not_force_push(self) -> None:
         stage = self.tmp / "stage"
-        prepare("ynwa", str(YNWA_FIXTURE), str(stage))
+        prepare("team", str(TEAM_FIXTURE), str(stage))
         other = self.tmp / "other"
         subprocess.check_call(["git", "clone", str(self.bare), str(other)], env=GIT_ENV)
 
         def before_push() -> None:
-            ynwa = other / "ynwa"
-            ynwa.mkdir()
-            (ynwa / "index.html").write_text("COMPETITOR\n", encoding="utf-8")
+            team = other / "team"
+            team.mkdir()
+            (team / "index.html").write_text("COMPETITOR\n", encoding="utf-8")
             git("add", "--all", cwd=other)
-            git("commit", "-m", "other ynwa", cwd=other)
+            git("commit", "-m", "other team", cwd=other)
             git("push", "origin", "HEAD:main", cwd=other)
 
         with self.assertRaises(MirrorError) as caught:
             release(
-                "ynwa",
+                "team",
                 str(stage),
                 str(self.clone),
                 remote="origin",
@@ -409,7 +409,7 @@ class ReleaseTests(unittest.TestCase):
             )
         self.assertIn("conflicted", str(caught.exception))
         self.assertEqual(
-            git("show", "origin/main:ynwa/index.html", cwd=self.clone),
+            git("show", "origin/main:team/index.html", cwd=self.clone),
             "COMPETITOR\n",
         )
         self.assertNotIn("--force", str(caught.exception))
@@ -562,6 +562,39 @@ class CanonicalTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = Path(tempfile.mkdtemp(prefix="ynwa-canonical-"))
         self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def test_pages_redirect_and_duplicate_publish_is_refused(self) -> None:
+        from ynwa_redirect import REDIRECT_HTML, ROOT_URL
+
+        page = (HERE / "fixtures" / "ynwa-redirect" / "index.html").read_bytes()
+        self.assertEqual(page, REDIRECT_HTML)
+        text = page.decode("utf-8")
+        self.assertEqual(text.count(ROOT_URL), 3)
+        self.assertIn(f'content="0; url={ROOT_URL}"', text)
+        self.assertIn(f'rel="canonical" href="{ROOT_URL}"', text)
+        self.assertIn(f'<a href="{ROOT_URL}">YNWA</a>', text)
+        self.assertNotIn("avatars/", text)
+        self.assertNotIn("<script", text.lower())
+        bare = self.tmp / "bare.git"
+        clone = self.tmp / "clone"
+        subprocess.check_call(["git", "init", "--bare", "-b", "main", str(bare)], env=GIT_ENV)
+        subprocess.check_call(["git", "clone", str(bare), str(clone)], env=GIT_ENV)
+        (clone / "README.md").write_text("hub\n", encoding="utf-8")
+        (clone / "news").mkdir()
+        (clone / "news" / "keep.txt").write_text("news\n", encoding="utf-8")
+        (clone / "lfc").mkdir()
+        (clone / "lfc" / "keep.txt").write_text("lfc\n", encoding="utf-8")
+        git("add", "--all", cwd=clone)
+        git("commit", "-m", "base", cwd=clone)
+        git("push", "origin", "HEAD:main", cwd=clone)
+        stage = self.tmp / "full-site"
+        prepare("ynwa", str(YNWA_FIXTURE), str(stage))
+        with self.assertRaises(MirrorError) as caught:
+            release("ynwa", str(stage), str(clone), remote="origin", branch="main")
+        self.assertIn("duplicate YNWA content", str(caught.exception))
+        self.assertNotIn("ynwa/", git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone))
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
+        self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
 
     def test_baseline_digest_is_the_recovered_zip(self) -> None:
         from ynwa_canonical import load_baseline
@@ -734,6 +767,13 @@ class CanonicalTests(unittest.TestCase):
         self.assertEqual(missing.returncode, 1)
         self.assertIn("does not create a clone", missing.stderr)
         self.assertFalse((self.tmp / "does-not-exist").exists())
+        duplicate = clone / "ynwa"
+        (duplicate / "avatars").mkdir(parents=True)
+        (duplicate / "avatars" / "gojo.png").write_bytes(b"duplicate-avatar")
+        (duplicate / "index.html").write_text("<h1>duplicate hub</h1>\n", encoding="utf-8")
+        git("add", "--all", cwd=clone)
+        git("commit", "-m", "duplicate ynwa", cwd=clone)
+        git("push", "origin", "HEAD:main", cwd=clone)
         mirrored = subprocess.run(
             [
                 sys.executable,
@@ -749,10 +789,16 @@ class CanonicalTests(unittest.TestCase):
             capture_output=True,
             text=True,
         )
-        self.assertIn("pushed ynwa", mirrored.stdout)
+        self.assertIn("redirects to https://2comma.github.io/", mirrored.stdout)
+        self.assertIn("Duplicate mirror content was not published", mirrored.stdout)
+        published = git("show", "origin/main:ynwa/index.html", cwd=clone)
+        self.assertIn('url=https://2comma.github.io/"', published)
+        self.assertIn('href="https://2comma.github.io/"', published)
+        names = git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone)
+        self.assertNotIn("ynwa/avatars/gojo.png", names)
+        self.assertNotIn("duplicate hub", published)
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
         self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
-        self.assertIn("/ynwa/favicon.svg", git("show", "origin/main:ynwa/index.html", cwd=clone))
         self.assertNotIn("Cloning", mirrored.stderr + mirrored.stdout)
 
     def test_sources_do_not_clone_or_call_cloudflare(self) -> None:
@@ -782,7 +828,15 @@ class CanonicalTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, stage, True)
         prepare("ynwa", str(YNWA_FIXTURE), str(stage / "ynwa"))
         prepare("team", str(TEAM_FIXTURE), str(stage / "team"))
-        roots = [YNWA_FIXTURE, TEAM_FIXTURE, EXPECTED_YNWA, EXPECTED_TEAM, stage / "ynwa", stage / "team"]
+        roots = [
+            YNWA_FIXTURE,
+            TEAM_FIXTURE,
+            EXPECTED_YNWA,
+            EXPECTED_TEAM,
+            HERE / "fixtures" / "ynwa-redirect",
+            stage / "ynwa",
+            stage / "team",
+        ]
         for root in roots:
             self.assertTrue(root.is_dir(), root)
             for path in root.rglob("*"):
