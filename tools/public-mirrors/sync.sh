@@ -21,6 +21,11 @@ if [[ "$TARGET" != "ynwa" && "$TARGET" != "team" ]]; then
   echo "public-mirrors: ERROR unknown target page: $TARGET" >&2
   exit 1
 fi
+if [[ "$TARGET" == "ynwa" ]]; then
+  echo "public-mirrors: ERROR YNWA is not published by sync.sh." >&2
+  echo "public-mirrors: Package the canonical dist, upload that ZIP in the Cloudflare dashboard, then run ynwa-dashboard-handoff.sh with the digest from packaging. See README.md." >&2
+  exit 1
+fi
 STAGE="$(mktemp -d)"
 cleanup() { rm -rf "$STAGE"; }
 trap cleanup EXIT

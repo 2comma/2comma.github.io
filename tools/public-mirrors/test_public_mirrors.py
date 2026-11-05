@@ -455,6 +455,20 @@ class HookTests(unittest.TestCase):
         self.assertEqual(unconfigured.returncode, 3)
         self.assertIn("nothing was published", unconfigured.stderr)
         self.assertIn("prepared team", unconfigured.stdout + unconfigured.stderr)
+        ynwa = subprocess.run(
+            [str(HERE / "sync.sh"), "ynwa", str(YNWA_FIXTURE)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(ynwa.returncode, 1)
+        self.assertIn("dashboard", ynwa.stderr)
+        hook_ynwa = subprocess.run(
+            [str(HERE / "integration-hook.sh"), "ynwa", str(YNWA_FIXTURE)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(hook_ynwa.returncode, 1)
+        self.assertIn("dashboard", hook_ynwa.stderr)
 
     def test_sources_do_not_reset_force_or_poll(self) -> None:
         blobs = []
@@ -498,6 +512,247 @@ class HookTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.stdout.strip(), "")
+
+
+class CanonicalTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = Path(tempfile.mkdtemp(prefix="ynwa-canonical-"))
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def test_baseline_digest_is_the_recovered_zip(self) -> None:
+        from ynwa_canonical import load_baseline
+
+        digest, files = load_baseline()
+        self.assertEqual(
+            digest,
+            "a9661e6fac7c9ddb71297db464655201caf942a63f024743387ebfa5747b718c",
+        )
+        self.assertEqual(len(files), 21)
+        self.assertEqual(
+            files["index.html"],
+            "9c8f8b9690b077b25356db9569eff228c8bdd8225f31eb8834af9247104bdc3e",
+        )
+
+    def test_restore_is_absent_only_and_digest_locked(self) -> None:
+        from ynwa_canonical import package_dist, restore_dist
+
+        dist = self.tmp / "src"
+        shutil.copytree(YNWA_FIXTURE, dist)
+        archive = self.tmp / "known.zip"
+        packaged = package_dist(str(dist), str(archive))
+        digest = packaged.split("sha256=", 1)[1].split()[0]
+        before = _files(dist)
+        hub = self.tmp / "ynwa-hub"
+        hub.mkdir()
+        (hub / "KEEP.txt").write_text("backup\n", encoding="utf-8")
+        occupied = hub / "dist"
+        occupied.mkdir()
+        (occupied / "index.html").write_text("leave me\n", encoding="utf-8")
+        with self.assertRaises(MirrorError):
+            restore_dist(str(archive), str(occupied), expected_sha256=digest)
+        self.assertEqual((occupied / "index.html").read_text(encoding="utf-8"), "leave me\n")
+        self.assertEqual((hub / "KEEP.txt").read_text(encoding="utf-8"), "backup\n")
+        fresh = self.tmp / "fresh-hub" / "dist"
+        with self.assertRaises(MirrorError):
+            restore_dist(str(archive), str(fresh), expected_sha256="0" * 64)
+        self.assertFalse(fresh.exists())
+        message = restore_dist(str(archive), str(fresh), expected_sha256=digest)
+        self.assertIn("restored 21", message)
+        self.assertEqual(_files(fresh), before)
+        with self.assertRaises(MirrorError):
+            restore_dist(str(archive), str(fresh), expected_sha256=digest)
+        self.assertEqual(_files(fresh), before)
+        cli = subprocess.run(
+            [
+                sys.executable,
+                str(HERE / "ynwa_canonical.py"),
+                "restore",
+                "--zip",
+                str(archive),
+                "--dest",
+                str(self.tmp / "cli-dest"),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(cli.returncode, 1)
+        self.assertIn("known public ZIP", cli.stderr)
+        self.assertFalse((self.tmp / "cli-dest").exists())
+
+    def test_package_does_not_deploy_or_modify_dist(self) -> None:
+        from ynwa_canonical import package_dist
+
+        dist = self.tmp / "dist"
+        shutil.copytree(YNWA_FIXTURE, dist)
+        before = _files(dist)
+        archive = self.tmp / "ynwa-deploy.zip"
+        message = package_dist(str(dist), str(archive))
+        self.assertIn("not deployed", message)
+        self.assertEqual(_files(dist), before)
+        self.assertFalse((self.tmp / "ynwa-dashboard-confirmed.json").exists())
+        extra = self.tmp / "extra-dist"
+        shutil.copytree(YNWA_FIXTURE, extra)
+        (extra / "secrets.env").write_text("token=abc\n", encoding="utf-8")
+        with self.assertRaises(MirrorError):
+            package_dist(str(extra), str(self.tmp / "nope.zip"))
+        self.assertFalse((self.tmp / "nope.zip").exists())
+        linked = self.tmp / "linked"
+        shutil.copytree(YNWA_FIXTURE, linked)
+        (linked / "avatars" / "ace.png").unlink()
+        (linked / "avatars" / "ace.png").symlink_to(linked / "favicon.svg")
+        with self.assertRaises(MirrorError):
+            package_dist(str(linked), str(self.tmp / "linked.zip"))
+
+    def test_changed_zip_is_not_mirrored_and_existing_clone_is_used(self) -> None:
+        from ynwa_canonical import confirm_dashboard, mirror_confirmed, package_dist
+
+        install = self.tmp / "public-mirrors"
+        shutil.copytree(
+            HERE,
+            install,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
+        self.assertFalse((install / ".git").exists())
+        dist = self.tmp / "dist"
+        shutil.copytree(YNWA_FIXTURE, dist)
+        archive = self.tmp / "ynwa-deploy.zip"
+        packaged = subprocess.run(
+            [
+                sys.executable,
+                str(install / "ynwa_canonical.py"),
+                "package",
+                "--dist",
+                str(dist),
+                "--out",
+                str(archive),
+            ],
+            cwd=self.tmp,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        digest = packaged.stdout.split("sha256=", 1)[1].split()[0]
+        bare = self.tmp / "bare.git"
+        clone = self.tmp / "existing-clone"
+        subprocess.check_call(["git", "init", "--bare", "-b", "main", str(bare)], env=GIT_ENV)
+        subprocess.check_call(["git", "clone", str(bare), str(clone)], env=GIT_ENV)
+        (clone / "news").mkdir()
+        (clone / "news" / "keep.txt").write_text("news\n", encoding="utf-8")
+        (clone / "lfc").mkdir()
+        (clone / "lfc" / "keep.txt").write_text("lfc\n", encoding="utf-8")
+        git("add", "--all", cwd=clone)
+        git("commit", "-m", "base", cwd=clone)
+        git("push", "origin", "HEAD:main", cwd=clone)
+        marker = self.tmp / "confirmed.json"
+        with self.assertRaises(MirrorError):
+            confirm_dashboard(
+                str(archive),
+                "1ad77aca",
+                str(marker),
+                confirm=False,
+                digest=digest,
+            )
+        confirm_dashboard(
+            str(archive),
+            "1ad77aca",
+            str(marker),
+            confirm=True,
+            digest=digest,
+        )
+        archive.write_bytes(archive.read_bytes() + b"\nchanged")
+        with self.assertRaises(MirrorError) as caught:
+            mirror_confirmed(str(marker), str(clone))
+        self.assertIn("changed after confirmation", str(caught.exception))
+        self.assertNotIn(
+            "ynwa/index.html",
+            git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone),
+        )
+        archive.write_bytes(Path(self.tmp / "ynwa-deploy.zip").read_bytes())
+        # The mutated bytes are what is on disk. Rebuild the original ZIP.
+        package_dist(str(dist), str(archive))
+        rebuilt = archive.read_bytes()
+        # Confirmation still names the first digest, so the rebuilt file must match it.
+        self.assertEqual(hashlib.sha256(rebuilt).hexdigest(), digest)
+        missing = subprocess.run(
+            [
+                sys.executable,
+                str(install / "ynwa_canonical.py"),
+                "mirror-confirmed",
+                "--marker",
+                str(marker),
+                "--repo",
+                str(self.tmp / "does-not-exist"),
+            ],
+            cwd=self.tmp,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(missing.returncode, 1)
+        self.assertIn("does not create a clone", missing.stderr)
+        self.assertFalse((self.tmp / "does-not-exist").exists())
+        mirrored = subprocess.run(
+            [
+                sys.executable,
+                str(install / "ynwa_canonical.py"),
+                "mirror-confirmed",
+                "--marker",
+                str(marker),
+                "--repo",
+                str(clone),
+            ],
+            cwd=self.tmp,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertIn("pushed ynwa", mirrored.stdout)
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
+        self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
+        self.assertIn("/ynwa/favicon.svg", git("show", "origin/main:ynwa/index.html", cwd=clone))
+        self.assertNotIn("Cloning", mirrored.stderr + mirrored.stdout)
+
+    def test_sources_do_not_clone_or_call_cloudflare(self) -> None:
+        blobs = []
+        for path in HERE.iterdir():
+            if path.name == "test_public_mirrors.py":
+                continue
+            if path.suffix in {".py", ".sh"}:
+                blobs.append(path.read_text(encoding="utf-8"))
+        text = "\n".join(blobs)
+        self.assertNotIn("git clone", text)
+        self.assertNotIn("npx wrangler", text.lower())
+        self.assertNotIn("wrangler pages", text.lower())
+        self.assertNotIn("api.cloudflare.com", text.lower())
+        self.assertNotIn("urllib.request", text)
+        self.assertNotIn("bc-ecf508e0", text)
+
+    def test_public_trees_have_no_unsanitized_identifiers(self) -> None:
+        from sensitive import scan_bytes, scan_text
+
+        roots = [REPO / "ynwa", REPO / "team", YNWA_FIXTURE, TEAM_FIXTURE]
+        for root in roots:
+            for path in root.rglob("*"):
+                if not path.is_file():
+                    continue
+                data = path.read_bytes()
+                scan_bytes(data, str(path))
+                if path.suffix.lower() in {".html", ".svg", ".md", ".txt", ".tsx", ".css", ".js"}:
+                    allow = path.name == "README.md"
+                    scan_text(data.decode("utf-8"), str(path), allow_canvas_provenance=allow)
+        listed = subprocess.run(
+            ["git", "ls-files"],
+            cwd=REPO,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+        for rel in listed:
+            if rel.endswith("test_public_mirrors.py"):
+                continue
+            body = (REPO / rel).read_bytes()
+            self.assertNotIn(b"bc-ecf508e0", body, rel)
+            self.assertNotIn(b"1Z999", body, rel)
+            self.assertNotIn(b"NYL-", body, rel)
 
 
 def _files(root: Path) -> dict[str, bytes]:

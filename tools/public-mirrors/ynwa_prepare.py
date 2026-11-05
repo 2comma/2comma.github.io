@@ -315,6 +315,47 @@ def rebase_text(text: str, base: str) -> str:
     return text
 
 
+def validate_canonical_references(files: dict[str, bytes]) -> None:
+    """Check a Cloudflare dist whose root-absolute URLs are still site-root paths.
+
+    This does not rewrite the dist. `/favicon.svg` must exist as `favicon.svg`.
+    """
+    for rel, data in files.items():
+        if not rel.lower().endswith(TEXT_SUFFIXES):
+            continue
+        text = data.decode("utf-8")
+        urls = [match.group(2) for match in LOCAL_ATTR.finditer(text)]
+        urls.extend(match.group(2) for match in CSS_URL.finditer(text))
+        for match in SRCSET_ATTR.finditer(text):
+            for chunk in match.group(2).split(","):
+                piece = chunk.strip()
+                if piece:
+                    urls.append(piece.split()[0])
+        for url in urls:
+            _require_canonical_target(files, rel, url)
+
+
+def _require_canonical_target(files: dict[str, bytes], owner: str, url: str) -> None:
+    stripped = url.strip()
+    if not stripped or stripped.startswith("#"):
+        return
+    lowered = stripped.lower()
+    if lowered.startswith("javascript:"):
+        raise MirrorError(f"javascript URL in {owner}")
+    if lowered.startswith(("mailto:", "tel:", "data:", "https:", "http:")) or stripped.startswith("//"):
+        return
+    if stripped.startswith("/"):
+        rel_path = stripped[1:].split("#", 1)[0].split("?", 1)[0]
+        if rel_path.endswith("/"):
+            rel_path += "index.html"
+        if rel_path not in files:
+            raise MirrorError(f"missing local asset {stripped} referenced by {owner}")
+        return
+    path = _resolve_relative(owner, stripped)
+    if path not in files:
+        raise MirrorError(f"missing local asset {stripped} referenced by {owner}")
+
+
 def check_local_links(files: dict[str, bytes], base: str) -> None:
     root = "/" + base.strip("/")
     for rel, data in files.items():

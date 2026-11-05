@@ -50,8 +50,10 @@ def release(
         staging_path = Path(staging)
         if not staging_path.is_dir():
             raise MirrorError(f"staging directory does not exist: {staging}")
-        if not (repo_path / ".git").exists() and not _is_git(repo_path):
-            raise MirrorError(f"not a git checkout: {repo}")
+        if not _is_git(repo_path):
+            raise MirrorError(
+                f"not an existing git checkout: {repo}. This tool does not create a clone."
+            )
         files = _read_staging(subdir, staging_path)
         lock = _acquire_lock(repo_path, lock_timeout)
         _git(repo_path, "fetch", remote, branch)
