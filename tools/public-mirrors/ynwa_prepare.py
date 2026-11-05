@@ -92,6 +92,34 @@ def prepare_ynwa(artifact: str, out_dir: str) -> list[str]:
     return notes
 
 
+def prepare_root_hub(artifact: str, out_dir: str) -> list[str]:
+    """Stage the public hub for the repository root. Paths stay root-absolute."""
+    from root_ownership import is_owned, is_protected
+
+    files, omitted = load_site(artifact)
+    check_limits(files)
+    kept: dict[str, bytes] = {}
+    for rel, data in files.items():
+        if is_protected(rel):
+            raise MirrorError(
+                f"refusing protected path {rel}. news, lfc, team, tools, and ynwa are not YNWA root files."
+            )
+        if not is_owned(rel):
+            raise MirrorError(
+                f"path is not on the YNWA root ownership manifest: {rel}. Nothing was published."
+            )
+        scan_payload(rel, data)
+        kept[rel] = data
+    if "index.html" not in kept:
+        raise MirrorError("YNWA artifact has no index.html. Nothing was published.")
+    validate_canonical_references(kept)
+    write_tree(out_dir, kept)
+    notes = [f"public-mirrors: prepared root hub ({len(kept)} files)"]
+    if omitted:
+        notes.append("omitted deploy metadata: " + ", ".join(omitted))
+    return notes
+
+
 def load_site(artifact: str) -> tuple[dict[str, bytes], list[str]]:
     path = Path(artifact)
     if not path.exists():
