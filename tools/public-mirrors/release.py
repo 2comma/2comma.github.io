@@ -104,6 +104,82 @@ def release(
         _EMPTY_HOOKS = None
 
 
+def release_root(
+    staging: str,
+    repo: str,
+    remote: str = "origin",
+    branch: str = "main",
+    lock_timeout: float = 60,
+    before_push=None,
+) -> str:
+    """Publish a public YNWA hub at the repository root, only on owned paths."""
+    from root_ownership import is_owned, is_protected
+
+    global _EMPTY_HOOKS
+    _reject_bad_remote(remote, branch)
+    hooks = tempfile.mkdtemp(prefix="public-mirror-hooks-")
+    _EMPTY_HOOKS = hooks
+    repo_path = Path(repo)
+    lock = None
+    work = None
+    try:
+        staging_path = Path(staging)
+        if not staging_path.is_dir():
+            raise MirrorError(f"staging directory does not exist: {staging}")
+        if not _is_git(repo_path):
+            raise MirrorError(
+                f"not an existing git checkout: {repo}. This tool does not create a clone."
+            )
+        files = _read_root_staging(staging_path)
+        for rel in files:
+            if is_protected(rel) or not is_owned(rel):
+                raise MirrorError(f"refusing to publish unowned root path {rel}")
+        lock = _acquire_lock(repo_path, lock_timeout)
+        _git(repo_path, "fetch", remote, branch)
+        scratch = Path(tempfile.mkdtemp(prefix="public-mirror-"))
+        work = scratch / "wt"
+        _git(repo_path, "worktree", "add", "--detach", str(work), "FETCH_HEAD")
+        removed = _apply_owned_root(work, files)
+        for rel in sorted(removed):
+            _git(work, "add", "-u", "--", rel)
+        for rel in sorted(files):
+            _git(work, "add", "--", rel)
+        staged = _staged_paths(work)
+        if not staged:
+            return "public-mirrors: root hub has no changes"
+        _assert_owned(staged)
+        stamp = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
+        _git(
+            work,
+            "-c",
+            "user.name=2comma",
+            "-c",
+            "user.email=2comma@users.noreply.github.com",
+            "commit",
+            "-m",
+            f"YNWA root hub: {stamp} build",
+        )
+        if before_push is not None:
+            before_push()
+        _push_with_retry(work, remote, branch, "", scope_check=_assert_owned)
+        head = _git(work, "rev-parse", "--short", "HEAD").stdout.strip()
+        return f"public-mirrors: pushed root hub ({head}) to {remote} {branch}"
+    finally:
+        if work is not None:
+            shutil.rmtree(work.parent, ignore_errors=True)
+            subprocess.run(
+                ["git", "-C", str(repo_path), "worktree", "prune"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        if lock is not None:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+            lock.close()
+        shutil.rmtree(hooks, ignore_errors=True)
+        _EMPTY_HOOKS = None
+
+
 def _reject_bad_remote(remote: str, branch: str) -> None:
     if remote.startswith("-") or branch.startswith("-"):
         raise MirrorError("refusing a remote or branch that looks like an option")
@@ -240,7 +316,87 @@ def _assert_scoped(paths: list[str], subdir: str) -> None:
             raise MirrorError(f"refusing to commit path outside /{subdir}/: {path}")
 
 
-def _push_with_retry(work: Path, remote: str, branch: str, subdir: str) -> None:
+def _assert_owned(paths: list[str]) -> None:
+    from root_ownership import is_owned, is_protected
+
+    for path in paths:
+        if is_protected(path) or not is_owned(path):
+            raise MirrorError(f"refusing to commit unowned path {path}")
+
+
+def _read_root_staging(staging: Path) -> dict[str, bytes]:
+    from root_ownership import is_owned, is_protected
+
+    files: dict[str, bytes] = {}
+    for dirpath, dirnames, filenames in os.walk(staging, followlinks=False):
+        for name in dirnames:
+            if (Path(dirpath) / name).is_symlink():
+                raise MirrorError("symlink in staging")
+        for name in filenames:
+            candidate = Path(dirpath) / name
+            if candidate.is_symlink():
+                raise MirrorError("symlink in staging")
+            rel = candidate.relative_to(staging).as_posix()
+            if is_protected(rel) or not is_owned(rel):
+                raise MirrorError(f"refusing to publish unowned root path {rel}")
+            files[rel] = candidate.read_bytes()
+    if "index.html" not in files:
+        raise MirrorError("root hub staging has no index.html")
+    return files
+
+
+def _apply_owned_root(work: Path, files: dict[str, bytes]) -> list[str]:
+    """Write owned hub files and delete owned files the new hub no longer has."""
+    from root_ownership import is_owned
+
+    existing = _existing_owned(work)
+    removed: list[str] = []
+    for rel in existing:
+        if rel in files or not is_owned(rel):
+            continue
+        path = work.joinpath(*rel.split("/"))
+        if path.is_symlink() or not path.is_file():
+            raise MirrorError(f"refusing to delete {rel}")
+        path.unlink()
+        removed.append(rel)
+        parent = path.parent
+        while parent != work and parent.exists() and not any(parent.iterdir()):
+            parent.rmdir()
+            parent = parent.parent
+    for rel, data in files.items():
+        dest = work.joinpath(*rel.split("/"))
+        if dest.is_symlink():
+            raise MirrorError(f"refusing to write through a symlink: {rel}")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+    return removed
+
+
+def _existing_owned(work: Path) -> list[str]:
+    from root_ownership import is_owned
+
+    found: list[str] = []
+    if not work.is_dir():
+        return found
+    for child in work.iterdir():
+        if child.is_symlink():
+            continue
+        if child.is_file() and is_owned(child.name):
+            found.append(child.name)
+        elif child.is_dir() and child.name in {"avatars", "icons"}:
+            for dirpath, dirnames, filenames in os.walk(child, followlinks=False):
+                dirnames[:] = [name for name in dirnames if not (Path(dirpath) / name).is_symlink()]
+                for name in filenames:
+                    candidate = Path(dirpath) / name
+                    if candidate.is_symlink():
+                        continue
+                    rel = candidate.relative_to(work).as_posix()
+                    if is_owned(rel):
+                        found.append(rel)
+    return found
+
+
+def _push_with_retry(work: Path, remote: str, branch: str, subdir: str, scope_check=None) -> None:
     refspec = f"HEAD:{branch}"
     for attempt in range(1, 6):
         result = subprocess.run(
@@ -278,7 +434,11 @@ def _push_with_retry(work: Path, remote: str, branch: str, subdir: str) -> None:
         if head == fetched:
             return
         diff = _git(work, "diff", "--name-only", "HEAD~1", "HEAD").stdout.splitlines()
-        _assert_scoped([line for line in diff if line], subdir)
+        names = [line for line in diff if line]
+        if scope_check is not None:
+            scope_check(names)
+        else:
+            _assert_scoped(names, subdir)
 
 
 def _non_fast_forward(detail: str) -> bool:

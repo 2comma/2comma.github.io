@@ -767,12 +767,18 @@ class CanonicalTests(unittest.TestCase):
         self.assertEqual(missing.returncode, 1)
         self.assertIn("does not create a clone", missing.stderr)
         self.assertFalse((self.tmp / "does-not-exist").exists())
-        duplicate = clone / "ynwa"
-        (duplicate / "avatars").mkdir(parents=True)
-        (duplicate / "avatars" / "gojo.png").write_bytes(b"duplicate-avatar")
-        (duplicate / "index.html").write_text("<h1>duplicate hub</h1>\n", encoding="utf-8")
+        from ynwa_redirect import REDIRECT_HTML
+
+        (clone / "ynwa").mkdir()
+        (clone / "ynwa" / "index.html").write_bytes(REDIRECT_HTML)
+        (clone / "icons").mkdir()
+        (clone / "icons" / "retired.svg").write_text("<svg></svg>\n", encoding="utf-8")
+        (clone / "team").mkdir()
+        (clone / "team" / "keep.txt").write_text("team\n", encoding="utf-8")
+        (clone / "tools").mkdir()
+        (clone / "tools" / "keep.txt").write_text("tools\n", encoding="utf-8")
         git("add", "--all", cwd=clone)
-        git("commit", "-m", "duplicate ynwa", cwd=clone)
+        git("commit", "-m", "legacy root and redirect", cwd=clone)
         git("push", "origin", "HEAD:main", cwd=clone)
         mirrored = subprocess.run(
             [
@@ -789,17 +795,67 @@ class CanonicalTests(unittest.TestCase):
             capture_output=True,
             text=True,
         )
-        self.assertIn("redirects to https://2comma.github.io/", mirrored.stdout)
-        self.assertIn("Duplicate mirror content was not published", mirrored.stdout)
-        published = git("show", "origin/main:ynwa/index.html", cwd=clone)
-        self.assertIn('url=https://2comma.github.io/"', published)
-        self.assertIn('href="https://2comma.github.io/"', published)
+        self.assertIn("site root", mirrored.stdout)
+        self.assertIn("was not replaced with a duplicate", mirrored.stdout)
+        root_page = git("show", "origin/main:index.html", cwd=clone)
+        source_page = (YNWA_FIXTURE / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(root_page, source_page)
+        self.assertIn('src="/avatars/gojo.png"', root_page)
+        self.assertNotIn('src="/ynwa/avatars/gojo.png"', root_page)
+        remote_png = subprocess.check_output(
+            ["git", "-C", str(clone), "show", "origin/main:avatars/gojo.png"],
+            env=GIT_ENV,
+        )
+        self.assertEqual(remote_png, (YNWA_FIXTURE / "avatars" / "gojo.png").read_bytes())
+        redirect = git("show", "origin/main:ynwa/index.html", cwd=clone)
+        self.assertEqual(redirect.encode("utf-8"), REDIRECT_HTML)
+        self.assertNotEqual(redirect, root_page)
         names = git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone)
-        self.assertNotIn("ynwa/avatars/gojo.png", names)
-        self.assertNotIn("duplicate hub", published)
+        self.assertNotIn("icons/retired.svg", names)
+        self.assertNotIn("ynwa/avatars/", names)
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
         self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
+        self.assertEqual(git("show", "origin/main:team/keep.txt", cwd=clone), "team\n")
+        self.assertEqual(git("show", "origin/main:tools/keep.txt", cwd=clone), "tools\n")
         self.assertNotIn("Cloning", mirrored.stderr + mirrored.stdout)
+        edited = self.tmp / "edited-dist"
+        shutil.copytree(dist, edited)
+        page = (edited / "index.html").read_text(encoding="utf-8")
+        page = page.replace("You'll Never Walk Alone", "You'll Never Walk Alone <!-- hub-update -->", 1)
+        (edited / "index.html").write_text(page, encoding="utf-8")
+        edited_msg = package_dist(str(edited), str(archive))
+        edited_digest = edited_msg.split("sha256=", 1)[1].split()[0]
+        self.assertNotEqual(edited_digest, digest)
+        with self.assertRaises(MirrorError) as stale:
+            mirror_confirmed(str(marker), str(clone))
+        self.assertIn("changed after confirmation", str(stale.exception))
+        self.assertNotIn("hub-update", git("show", "origin/main:index.html", cwd=clone))
+        confirm_dashboard(
+            str(archive),
+            "1ad77acb",
+            str(marker),
+            confirm=True,
+            digest=edited_digest,
+        )
+        mirror_confirmed(str(marker), str(clone))
+        updated = git("show", "origin/main:index.html", cwd=clone)
+        self.assertIn("hub-update", updated)
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
+        self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
+        self.assertEqual(git("show", "origin/main:team/keep.txt", cwd=clone), "team\n")
+        unsafe = self.tmp / "unsafe.zip"
+        _zip(
+            unsafe,
+            {
+                "index.html": (YNWA_FIXTURE / "index.html").read_bytes(),
+                "news/pwn.html": b"nope",
+            },
+        )
+        with self.assertRaises(MirrorError):
+            prepare_root = __import__("ynwa_prepare", fromlist=["prepare_root_hub"]).prepare_root_hub
+            prepare_root(str(unsafe), str(self.tmp / "unsafe-out"))
+        self.assertFalse((self.tmp / "unsafe-out").exists())
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
 
     def test_sources_do_not_clone_or_call_cloudflare(self) -> None:
         blobs = []

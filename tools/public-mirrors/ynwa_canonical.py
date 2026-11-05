@@ -19,8 +19,8 @@ import tempfile
 from pathlib import Path
 
 from common import MirrorError
-from release import release
-from ynwa_redirect import ROOT_URL, redirect_files
+from release import release_root
+from ynwa_prepare import prepare_root_hub
 from ynwa_prepare import (
     load_site,
     scan_payload,
@@ -201,10 +201,10 @@ def mirror_confirmed(
     remote: str = "origin",
     branch: str = "main",
 ) -> str:
-    """Check the confirmed ZIP, then publish only the /ynwa/ root redirect.
+    """Check the confirmed ZIP, then publish that hub at the repository root.
 
-    The ZIP is the Cloudflare artifact. Its pages are not copied into the
-    GitHub checkout. /ynwa/ stays a redirect to the site root.
+    Asset paths stay root-absolute, matching the public site. /ynwa/ is not
+    filled with a second copy. news/, lfc/, team/, and tools/ are not staged.
     """
     marker_file = Path(marker_path)
     if not marker_file.is_file():
@@ -232,17 +232,17 @@ def mirror_confirmed(
         raise MirrorError("ZIP changed before publish. Nothing was mirrored.")
     stage = tempfile.mkdtemp(prefix="ynwa-confirmed-")
     try:
-        staging = Path(stage) / "site"
-        staging.mkdir()
-        for rel, data in redirect_files().items():
-            (staging / rel).write_bytes(data)
-        published = release("ynwa", str(staging), repo, remote=remote, branch=branch)
+        staging = str(Path(stage) / "site")
+        prepare_root_hub(str(archive), staging)
+        if sha256_file(archive) != expected:
+            raise MirrorError("ZIP changed while staging. Nothing was mirrored.")
+        published = release_root(staging, repo, remote=remote, branch=branch)
     finally:
         _remove_tree(Path(stage))
     return (
         published
-        + f"\npublic-mirrors: /ynwa/ redirects to {ROOT_URL}. "
-        "Duplicate mirror content was not published."
+        + "\npublic-mirrors: YNWA hub is at the site root. "
+        "/ynwa/ was not replaced with a duplicate."
     )
 
 
