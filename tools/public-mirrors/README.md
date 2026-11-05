@@ -58,7 +58,7 @@ PUBLIC_MIRROR_REPO=/path/to/existing-mirror-checkout \
   --confirm-dashboard-success
 ```
 
-`PUBLIC_MIRROR_REPO` must already be a git checkout of this repository, such as the checkout already used for the news or LFC mirror. If it is unset or is not a checkout, the handoff records nothing further and does not clone. The handoff re-hashes the ZIP. If the file no longer matches `--digest`, it does not publish. When the digest matches, it copies that public hub onto the repository root. Paths stay root-absolute. It may replace or delete only owned hub files (`index.html`, `favicon.svg`, `team-logo.svg`, `avatars/`, and `icons/`). It does not stage `news/`, `lfc/`, `team/`, `tools/`, or the `/ynwa/` redirect. A failed publish leaves the confirmation in place. Retry the same ZIP with:
+`PUBLIC_MIRROR_REPO` must already be a git checkout of this repository, such as the checkout already used for the news or LFC mirror. If it is unset or is not a checkout, the handoff records nothing further and does not clone. The handoff re-hashes the ZIP. If the file no longer matches `--digest`, it does not publish. When the digest matches, it copies that public hub onto the repository root. Paths stay root-absolute. The only root paths it may replace or delete are `index.html`, `favicon.svg`, `team-logo.svg`, and image files directly in `avatars/` or `icons/`. Other root files, including `robots.txt` or an extra HTML page, are not owned: an artifact that contains one is rejected, and a sync does not delete one that is already in the checkout. It does not stage `news/`, `lfc/`, `team/`, `tools/`, or the `/ynwa/` redirect. A failed publish leaves the confirmation in place. Retry the same ZIP with:
 
 ```bash
 PUBLIC_MIRROR_REPO=/path/to/existing-mirror-checkout \

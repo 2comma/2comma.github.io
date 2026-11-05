@@ -596,6 +596,103 @@ class CanonicalTests(unittest.TestCase):
         self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
         self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
 
+    def test_unrelated_root_files_survive_and_unexpected_root_input_is_rejected(self) -> None:
+        from release import release_root
+        from root_ownership import is_owned
+        from ynwa_prepare import prepare_root_hub
+        from ynwa_redirect import REDIRECT_HTML
+
+        for rel in ("unrelated.html", "custom.css", "robots.txt", "other.png", "CNAME"):
+            self.assertFalse(is_owned(rel), rel)
+        for rel in ("icons/notes.txt", "avatars/nested/gojo.png", "avatars/secret.env"):
+            self.assertFalse(is_owned(rel), rel)
+        for rel in ("index.html", "favicon.svg", "team-logo.svg", "icons/retired.svg", "avatars/gojo.png"):
+            self.assertTrue(is_owned(rel), rel)
+
+        bare = self.tmp / "bare.git"
+        clone = self.tmp / "existing"
+        subprocess.check_call(["git", "init", "--bare", "-b", "main", str(bare)], env=GIT_ENV)
+        subprocess.check_call(["git", "clone", str(bare), str(clone)], env=GIT_ENV)
+        unrelated = {
+            "unrelated.html": b"<p>leave</p>\n",
+            "custom.css": b"body{}\n",
+            "robots.txt": b"User-agent: *\n",
+            "other.png": b"\x89PNG-unrelated",
+            "icons/notes.txt": b"not an icon\n",
+        }
+        (clone / "icons").mkdir()
+        (clone / "icons" / "retired.svg").write_text("<svg>old</svg>\n", encoding="utf-8")
+        for rel, data in unrelated.items():
+            path = clone.joinpath(*rel.split("/"))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        (clone / "news").mkdir()
+        (clone / "news" / "keep.txt").write_text("news\n", encoding="utf-8")
+        (clone / "lfc").mkdir()
+        (clone / "lfc" / "keep.txt").write_text("lfc\n", encoding="utf-8")
+        (clone / "team").mkdir()
+        (clone / "team" / "keep.txt").write_text("team\n", encoding="utf-8")
+        (clone / "tools").mkdir()
+        (clone / "tools" / "keep.txt").write_text("tools\n", encoding="utf-8")
+        (clone / "ynwa").mkdir()
+        (clone / "ynwa" / "index.html").write_bytes(REDIRECT_HTML)
+        git("add", "--all", cwd=clone)
+        git("commit", "-m", "base", cwd=clone)
+        git("push", "origin", "HEAD:main", cwd=clone)
+
+        stage = self.tmp / "root-stage"
+        prepare_root_hub(str(YNWA_FIXTURE), str(stage))
+        self.assertEqual((stage / "index.html").read_bytes(), (YNWA_FIXTURE / "index.html").read_bytes())
+        self.assertEqual(
+            (stage / "avatars" / "gojo.png").read_bytes(),
+            (YNWA_FIXTURE / "avatars" / "gojo.png").read_bytes(),
+        )
+        release_root(str(stage), str(clone), remote="origin", branch="main")
+        self._assert_unrelated_survived(clone, unrelated)
+        self.assertNotIn("icons/retired.svg", git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone))
+        self.assertEqual(
+            git("show", "origin/main:index.html", cwd=clone),
+            (YNWA_FIXTURE / "index.html").read_text(encoding="utf-8"),
+        )
+        self.assertEqual(git("show", "origin/main:ynwa/index.html", cwd=clone).encode("utf-8"), REDIRECT_HTML)
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
+        self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc\n")
+        self.assertEqual(git("show", "origin/main:team/keep.txt", cwd=clone), "team\n")
+        self.assertEqual(git("show", "origin/main:tools/keep.txt", cwd=clone), "tools\n")
+
+        edited = self.tmp / "edited"
+        shutil.copytree(YNWA_FIXTURE, edited)
+        text = (edited / "index.html").read_text(encoding="utf-8")
+        (edited / "index.html").write_text(text.replace("You'll Never Walk Alone", "You'll Never Walk Alone <!-- later -->", 1), encoding="utf-8")
+        later = self.tmp / "later-stage"
+        prepare_root_hub(str(edited), str(later))
+        release_root(str(later), str(clone), remote="origin", branch="main")
+        updated = git("show", "origin/main:index.html", cwd=clone)
+        self.assertIn("later", updated)
+        self.assertIn("icons/prw.svg", git("ls-tree", "-r", "--name-only", "origin/main", cwd=clone))
+        self._assert_unrelated_survived(clone, unrelated)
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news\n")
+        self.assertEqual(git("show", "origin/main:ynwa/index.html", cwd=clone).encode("utf-8"), REDIRECT_HTML)
+
+        rejected = self.tmp / "rejected"
+        shutil.copytree(YNWA_FIXTURE, rejected)
+        (rejected / "robots.txt").write_text("User-agent: *\n", encoding="utf-8")
+        with self.assertRaises(MirrorError) as caught:
+            prepare_root_hub(str(rejected), str(self.tmp / "rejected-out"))
+        self.assertIn("robots.txt", str(caught.exception))
+        self.assertFalse((self.tmp / "rejected-out").exists())
+        self.assertEqual((clone / "robots.txt").read_bytes(), unrelated["robots.txt"])
+        self.assertIn("later", git("show", "origin/main:index.html", cwd=clone))
+
+    def _assert_unrelated_survived(self, clone: Path, unrelated: dict[str, bytes]) -> None:
+        for rel, data in unrelated.items():
+            published = subprocess.check_output(
+                ["git", "-C", str(clone), "show", f"origin/main:{rel}"],
+                env=GIT_ENV,
+            )
+            self.assertEqual(published, data, rel)
+            self.assertEqual(clone.joinpath(*rel.split("/")).read_bytes(), data, rel)
+
     def test_baseline_digest_is_the_recovered_zip(self) -> None:
         from ynwa_canonical import load_baseline
 

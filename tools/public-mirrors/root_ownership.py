@@ -1,10 +1,13 @@
 """Paths the YNWA hub may create, replace, or delete at the repository root.
 
-news/, lfc/, team/, tools/, and ynwa/ are not owned. A root sync cannot stage
-them. Owned paths are the public hub's root files, avatars/, and icons/.
+Ownership is exact. The hub owns index.html, favicon.svg, team-logo.svg, and
+image files directly under avatars/ and icons/. It does not own other root
+files, and it does not own news/, lfc/, team/, tools/, or ynwa/.
 """
 
 from __future__ import annotations
+
+import re
 
 PROTECTED_PREFIXES = ("news/", "lfc/", "team/", "tools/", "ynwa/")
 PROTECTED_EXACT = {
@@ -13,6 +16,13 @@ PROTECTED_EXACT = {
     ".github",
     ".nojekyll",
 }
+OWNED_ROOT_FILES = frozenset({"index.html", "favicon.svg", "team-logo.svg"})
+AVATAR_FILE = re.compile(
+    r"^avatars/[a-z0-9][a-z0-9._-]{0,80}\.(png|jpg|jpeg|webp|gif|svg)$"
+)
+ICON_FILE = re.compile(
+    r"^icons/[a-z0-9][a-z0-9._-]{0,80}\.(png|jpg|jpeg|webp|gif|svg|ico)$"
+)
 
 
 def is_protected(rel: str) -> bool:
@@ -24,6 +34,9 @@ def is_protected(rel: str) -> bool:
 
 
 def is_owned(rel: str) -> bool:
-    from ynwa_prepare import allowed
-
-    return bool(rel) and not is_protected(rel) and allowed(rel)
+    """True only for the three hub files or one image directly under avatars/ or icons/."""
+    if is_protected(rel):
+        return False
+    if rel in OWNED_ROOT_FILES:
+        return True
+    return bool(AVATAR_FILE.fullmatch(rel) or ICON_FILE.fullmatch(rel))
