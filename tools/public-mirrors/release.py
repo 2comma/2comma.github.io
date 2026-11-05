@@ -147,6 +147,11 @@ def _git_env() -> dict[str, str]:
     """
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
+    # Rebase needs a committer. Do not depend on a global git identity.
+    env["GIT_AUTHOR_NAME"] = "2comma"
+    env["GIT_AUTHOR_EMAIL"] = "2comma@users.noreply.github.com"
+    env["GIT_COMMITTER_NAME"] = "2comma"
+    env["GIT_COMMITTER_EMAIL"] = "2comma@users.noreply.github.com"
     if _EMPTY_HOOKS:
         env["GIT_CONFIG_COUNT"] = "1"
         env["GIT_CONFIG_KEY_0"] = "core.hooksPath"

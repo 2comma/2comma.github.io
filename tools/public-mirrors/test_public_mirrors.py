@@ -15,7 +15,6 @@ import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 
 from common import MirrorError, redact  # noqa: E402
@@ -26,6 +25,8 @@ from sensitive import scan_text  # noqa: E402
 
 YNWA_FIXTURE = HERE / "fixtures" / "ynwa-public"
 TEAM_FIXTURE = HERE / "fixtures" / "team-status"
+EXPECTED_YNWA = HERE / "fixtures" / "expected-ynwa"
+EXPECTED_TEAM = HERE / "fixtures" / "expected-team"
 EXTERNAL = [
     "https://team.twocommanews.com",
     "https://twocommanews.com",
@@ -110,12 +111,27 @@ class PrepareTests(unittest.TestCase):
         )
 
     def test_published_trees_match_prepare(self) -> None:
+        """Prepared sites match the golden files shipped with this tool.
+
+        The comparison is against fixtures/expected-*, not a parent checkout.
+        YNWA binaries must stay byte-identical to the public source fixture.
+        """
         ynwa_out = self.tmp / "ynwa"
         team_out = self.tmp / "team"
         prepare("ynwa", str(YNWA_FIXTURE), str(ynwa_out))
         prepare("team", str(TEAM_FIXTURE), str(team_out))
-        self.assertEqual(_files(ynwa_out), _files(REPO / "ynwa"))
-        self.assertEqual(_files(team_out), _files(REPO / "team"))
+        produced = _files(ynwa_out)
+        source = _files(YNWA_FIXTURE)
+        self.assertEqual(set(produced), set(source) | {".nojekyll"})
+        self.assertEqual(produced["index.html"], (EXPECTED_YNWA / "index.html").read_bytes())
+        self.assertNotEqual(produced["index.html"], source["index.html"])
+        self.assertEqual(produced[".nojekyll"], b"")
+        for rel, data in source.items():
+            if rel == "index.html":
+                continue
+            self.assertEqual(produced[rel], data, rel)
+        self.assertEqual(_files(team_out), _files(EXPECTED_TEAM))
+        self.assertIn(b"As of Thu Nov 5, 2026, 7:00 AM PT.", _files(team_out)["index.html"])
 
     def test_team_page_keeps_source_text_and_timestamp(self) -> None:
         out = self.tmp / "team"
@@ -492,26 +508,54 @@ class HookTests(unittest.TestCase):
             self.assertNotIn(banned, text)
 
     def test_protected_repository_paths_are_untouched(self) -> None:
-        result = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--name-only",
-                "main",
-                "--",
-                "news",
-                "lfc",
-                "index.html",
-                "README.md",
-                "favicon.svg",
-                "icons",
-            ],
-            cwd=REPO,
-            check=True,
-            capture_output=True,
-            text=True,
+        """A release into a disposable checkout must not rewrite news, lfc, or the hub."""
+        tmp = Path(tempfile.mkdtemp(prefix="protected-repo-"))
+        self.addCleanup(shutil.rmtree, tmp, True)
+        bare = tmp / "bare.git"
+        clone = tmp / "clone"
+        subprocess.check_call(["git", "init", "--bare", "-b", "main", str(bare)], env=GIT_ENV)
+        subprocess.check_call(["git", "clone", str(bare), str(clone)], env=GIT_ENV)
+        (clone / "news").mkdir()
+        (clone / "news" / "keep.txt").write_text("news-body\n", encoding="utf-8")
+        (clone / "lfc").mkdir()
+        (clone / "lfc" / "keep.txt").write_text("lfc-body\n", encoding="utf-8")
+        (clone / "index.html").write_text("<h1>hub</h1>\n", encoding="utf-8")
+        (clone / "README.md").write_text("readme\n", encoding="utf-8")
+        (clone / "favicon.svg").write_text("<svg></svg>\n", encoding="utf-8")
+        (clone / "icons").mkdir()
+        (clone / "icons" / "jc.svg").write_text("<svg></svg>\n", encoding="utf-8")
+        git("add", "--all", cwd=clone)
+        git("commit", "-m", "base", cwd=clone)
+        git("push", "origin", "HEAD:main", cwd=clone)
+        (clone / "index.html").write_text("<h1>dirty local edit</h1>\n", encoding="utf-8")
+        stage = tmp / "stage"
+        prepare("team", str(TEAM_FIXTURE), str(stage))
+        release("team", str(stage), str(clone), remote="origin", branch="main")
+        self.assertEqual((clone / "index.html").read_text(encoding="utf-8"), "<h1>dirty local edit</h1>\n")
+        self.assertEqual((clone / "news" / "keep.txt").read_text(encoding="utf-8"), "news-body\n")
+        self.assertEqual((clone / "lfc" / "keep.txt").read_text(encoding="utf-8"), "lfc-body\n")
+        self.assertEqual((clone / "README.md").read_text(encoding="utf-8"), "readme\n")
+        self.assertEqual((clone / "favicon.svg").read_text(encoding="utf-8"), "<svg></svg>\n")
+        self.assertEqual((clone / "icons" / "jc.svg").read_text(encoding="utf-8"), "<svg></svg>\n")
+        published = git(
+            "diff",
+            "--name-only",
+            "origin/main~1",
+            "origin/main",
+            "--",
+            "news",
+            "lfc",
+            "index.html",
+            "README.md",
+            "favicon.svg",
+            "icons",
+            cwd=clone,
         )
-        self.assertEqual(result.stdout.strip(), "")
+        self.assertEqual(published.strip(), "")
+        self.assertEqual(git("show", "origin/main:news/keep.txt", cwd=clone), "news-body\n")
+        self.assertEqual(git("show", "origin/main:lfc/keep.txt", cwd=clone), "lfc-body\n")
+        self.assertEqual(git("show", "origin/main:index.html", cwd=clone), "<h1>hub</h1>\n")
+        self.assertIn("Team Status", git("show", "origin/main:team/index.html", cwd=clone))
 
 
 class CanonicalTests(unittest.TestCase):
@@ -727,32 +771,37 @@ class CanonicalTests(unittest.TestCase):
         self.assertNotIn("bc-ecf508e0", text)
 
     def test_public_trees_have_no_unsanitized_identifiers(self) -> None:
+        """Scan shipped fixtures and the sites prepare() emits from them.
+
+        This does not walk parent directories. An install under /workspace must
+        not read an unrelated /workspace/team tree.
+        """
         from sensitive import scan_bytes, scan_text
 
-        roots = [REPO / "ynwa", REPO / "team", YNWA_FIXTURE, TEAM_FIXTURE]
+        stage = Path(tempfile.mkdtemp(prefix="scan-stage-"))
+        self.addCleanup(shutil.rmtree, stage, True)
+        prepare("ynwa", str(YNWA_FIXTURE), str(stage / "ynwa"))
+        prepare("team", str(TEAM_FIXTURE), str(stage / "team"))
+        roots = [YNWA_FIXTURE, TEAM_FIXTURE, EXPECTED_YNWA, EXPECTED_TEAM, stage / "ynwa", stage / "team"]
         for root in roots:
+            self.assertTrue(root.is_dir(), root)
             for path in root.rglob("*"):
                 if not path.is_file():
                     continue
                 data = path.read_bytes()
                 scan_bytes(data, str(path))
                 if path.suffix.lower() in {".html", ".svg", ".md", ".txt", ".tsx", ".css", ".js"}:
-                    allow = path.name == "README.md"
+                    allow = path.name == "README.md" and TEAM_FIXTURE in path.parents
                     scan_text(data.decode("utf-8"), str(path), allow_canvas_provenance=allow)
-        listed = subprocess.run(
-            ["git", "ls-files"],
-            cwd=REPO,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.splitlines()
-        for rel in listed:
-            if rel.endswith("test_public_mirrors.py"):
+        for path in HERE.rglob("*"):
+            if not path.is_file() or path.name == "test_public_mirrors.py":
                 continue
-            body = (REPO / rel).read_bytes()
-            self.assertNotIn(b"bc-ecf508e0", body, rel)
-            self.assertNotIn(b"1Z999", body, rel)
-            self.assertNotIn(b"NYL-", body, rel)
+            if "__pycache__" in path.parts:
+                continue
+            body = path.read_bytes()
+            self.assertNotIn(b"bc-ecf508e0", body, str(path))
+            self.assertNotIn(b"1Z999", body, str(path))
+            self.assertNotIn(b"NYL-", body, str(path))
 
 
 def _files(root: Path) -> dict[str, bytes]:

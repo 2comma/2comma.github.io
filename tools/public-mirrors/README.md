@@ -91,7 +91,9 @@ Do not add cron, a GitHub Action, or a Cloudflare token. The scripts do not read
 ## Checks
 
 ```bash
-python3 tools/public-mirrors/test_public_mirrors.py
+python3 /path/to/public-mirrors/test_public_mirrors.py
 ```
+
+The suite uses the fixtures shipped in this directory and disposable git repositories. It does not read a parent checkout.
 
 `sync.sh` exit codes: `0` published or already current, `1` rejected, `2` usage, `3` prepared but not published because the checkout is unset. YNWA `sync.sh` is always `1` and tells you to use the dashboard handoff.

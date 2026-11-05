@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Status</title>
+<meta name="description" content="What needs you, what&#x27;s blocked, and what each bot is doing, highest priority first. Updated daily at 7 AM PT. As of Thu Nov 5, 2026, 7:00 AM PT.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f6f6f4;
+  --ink: #1c1917;
+  --muted: #44403c;
+  --line: #d6d3d1;
+  --paper: #ffffff;
+  --danger: #9f1239;
+  --warning: #92400e;
+  --success: #166534;
+  --info: #1e3a8a;
+  --callout-bg: #fffbeb;
+  --callout-ink: #1c1917;
+  --focus: #1d4ed8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141413;
+    --ink: #f5f5f4;
+    --muted: #d6d3d1;
+    --line: #44403c;
+    --paper: #1c1c1a;
+    --danger: #fecdd3;
+    --warning: #fde68a;
+    --success: #bbf7d0;
+    --info: #bfdbfe;
+    --callout-bg: #292524;
+    --callout-ink: #f5f5f4;
+    --focus: #93c5fd;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: inherit; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+main { margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+main[data-width="column"] { max-width: 43.75rem; }
+main[data-width="wide"] { max-width: 80rem; }
+main[data-width="full"] { max-width: none; }
+h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 0.75rem; }
+h2 { font-size: 1.3rem; line-height: 1.3; margin: 0 0 0.75rem; }
+h3 { font-size: 1.05rem; line-height: 1.35; margin: 0; }
+.summary { margin: 0 0 1.25rem; font-size: 1.05rem; }
+nav ol { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0; margin: 0 0 2rem; list-style: none; }
+nav a { color: var(--ink); }
+.section { margin: 0 0 2.5rem; }
+.caption { margin: 0.75rem 0 0; color: var(--muted); }
+.rows { display: flex; flex-direction: column; }
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.35rem;
+  align-items: baseline;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+.row.no-lead { grid-template-columns: minmax(0, 1fr) auto auto; }
+.lead { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+.title { margin: 0; }
+.detail { grid-column: 2 / -1; margin: 0; }
+.row.no-lead .detail { grid-column: 1 / -1; }
+.meta { margin: 0; color: var(--muted); text-align: right; }
+.status { margin: 0; font-weight: 600; white-space: nowrap; }
+.status[data-tone="danger"] { color: var(--danger); }
+.status[data-tone="warning"] { color: var(--warning); }
+.status[data-tone="success"] { color: var(--success); }
+.callout {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--callout-bg);
+  color: var(--callout-ink);
+  border-left: 4px solid var(--line);
+}
+.callout[data-tone="warning"] { border-left-color: var(--warning); }
+.callout[data-tone="danger"] { border-left-color: var(--danger); }
+.callout[data-tone="success"] { border-left-color: var(--success); }
+.callout[data-tone="info"] { border-left-color: var(--info); }
+.callout p { margin: 0.4rem 0 0; }
+.callout p:first-child { margin-top: 0; }
+.kicker { font-weight: 700; }
+.prose { margin: 0.9rem 0 0; }
+.scroll-hint { margin: 0 0 0.4rem; color: var(--muted); font-size: 0.9rem; }
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+table { border-collapse: collapse; width: 100%; min-width: 52rem; }
+th, td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { font-weight: 600; }
+tbody th { font-weight: 600; }
+tr:last-child th, tr:last-child td { border-bottom: 0; }
+td[data-tone="danger"], th[data-tone="danger"] { color: var(--danger); font-weight: 600; }
+td[data-tone="warning"], th[data-tone="warning"] { color: var(--warning); font-weight: 600; }
+td[data-tone="success"], th[data-tone="success"] { color: var(--success); font-weight: 600; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 640px) {
+  .row, .row.no-lead { grid-template-columns: auto minmax(0, 1fr); }
+  .status, .meta, .row.no-lead .status, .row.no-lead .meta { grid-column: 2; text-align: left; }
+  .detail, .row.no-lead .detail { grid-column: 2; }
+  .row.no-lead .title { grid-column: 1 / -1; }
+  .status { white-space: normal; }
+}
+@media (min-width: 801px) {
+  .scroll-hint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+}
+@media print {
+  body { background: #fff; color: #000; }
+  .skip, nav { display: none; }
+  .table-scroll { overflow: visible; }
+  table { min-width: 0; }
+  a { text-decoration: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<main id="content" data-width="wide">
+<header>
+<h1>Team Status</h1>
+<p class="summary">What needs you, what's blocked, and what each bot is doing, highest priority first. Updated daily at 7 AM PT. As of Thu Nov 5, 2026, 7:00 AM PT.</p>
+</header>
+<nav aria-label="Sections"><ol><li><a href="#needs-you">Needs you</a></li><li><a href="#blocked">Blocked</a></li><li><a href="#each-bot">Each bot</a></li><li><a href="#rules-check">Rules check</a></li></ol></nav>
+<section class="section" id="needs-you" aria-labelledby="needs-you-heading">
+<h2 id="needs-you-heading">Needs you</h2>
+<div class="rows"><article class="row"><p class="lead"><span class="sr-only">Item </span>1</p><h3 class="title">Check that Tobi's paused routines are back on</h3><p class="status" data-tone="danger"><span class="sr-only">Status, danger. </span>Before 8 AM</p><p class="meta">Tobi</p><p class="detail">At 10:58 PM last night Tobi's scheduled resume was refused (a routine run can't re-enable routines), so it asked for these to be resumed from chat: the 8 AM morning brief, the wishlist price tracker, the iPhone Duo instant-buy, the Lems order tracking and the watcher health check. The health check has logged every hour since midnight, but no log line shows the other four were turned back on. Today's 8 AM brief and the iPhone auto-buy (watch ends Nov 8) depend on them.</p></article>
+<article class="row"><p class="lead"><span class="sr-only">Item </span>2</p><h3 class="title">Approve dr eggbot creating the pilot's watchdog and Nov 12 routines</h3><p class="status" data-tone="warning"><span class="sr-only">Status, warning. </span>Blocking pilot</p><p class="meta">dr eggbot</p><p class="detail">The no-AI page-check pilot for Zen started at 4 AM: the script is built, tested and running, and the design went to Zen. The watchdog and the Nov 12 follow-up routines couldn't be created from a routine run, so they need a go-ahead in dr eggbot's chat.</p></article>
+<article class="row"><p class="lead"><span class="sr-only">Item </span>3</p><h3 class="title">Confirm the Lems order arrived</h3><p class="status"><span class="sr-only">Status. </span>Awaiting you</p><p class="meta">Tobi</p><p class="detail">the UPS shipment was expected Wed Nov 4. Tobi deletes the tracking routine only after you confirm delivery.</p></article>
+<article class="row"><p class="lead"><span class="sr-only">Item </span>4</p><h3 class="title">Pick Levi's ideas for Zen</h3><p class="status"><span class="sr-only">Status. </span>Awaiting you</p><p class="meta">Gojo</p><p class="detail">Carried over. My recommendation was the beehiiv connector only, skipping the separate-email routines. Levi also sent one keeper on Nov 2 (a PropRuleWatch sponsor slot). Nothing on the board or in the logs shows a decision yet.</p></article>
+<article class="row"><p class="lead"><span class="sr-only">Item </span>5</p><h3 class="title">Give L the go for the next stocks-course batch</h3><p class="status"><span class="sr-only">Status. </span>Optional</p><p class="meta">L</p><p class="detail">Lessons 73 to 77 are recorded (77 of 163). L is paused until you say to start the next batch at lesson 78.</p></article>
+<article class="row"><p class="lead"><span class="sr-only">Item </span>6</p><h3 class="title">Website category expansion</h3><p class="status"><span class="sr-only">Status. </span>Optional</p><p class="meta">Morgans</p><p class="detail">Morgans ranked the options with Personal Finance first; the ranking is in Morgans' chat.</p></article>
+</div>
+<p class="prose">Cleared since the last update: the NY Life cancellation (Tobi logged that you submitted termination for the policy on Nov 2; the BofA check on Nov 17 stays) and Ace's course block (you said resume, and Ace is recording again).</p>
+</section>
+<section class="section" id="blocked" aria-labelledby="blocked-heading">
+<h2 id="blocked-heading">Blocked</h2>
+<div class="rows"><article class="row no-lead"><h3 class="title">Routinizer pilot follow-up routines</h3><p class="status" data-tone="warning"><span class="sr-only">Status, warning. </span>Blocked</p><p class="meta">dr eggbot</p><p class="detail">Watchdog and Nov 12 routines not created; waiting on item 2 above. The existing Zen page check stays on until the pilot is verified.</p></article>
+<article class="row no-lead"><h3 class="title">Short-form video</h3><p class="status"><span class="sr-only">Status. </span>On hold</p><p class="meta">Morgans</p><p class="detail">On hold by you until an easier option appears.</p></article>
+</div>
+</section>
+<section class="section" id="each-bot" aria-labelledby="each-bot-heading">
+<h2 id="each-bot-heading">Each bot</h2>
+<p class="scroll-hint">This table scrolls sideways on a narrow screen. Every column is in the page.</p>
+<div class="table-scroll" tabindex="0">
+<table aria-labelledby="each-bot-heading">
+<thead><tr><th scope="col">Bot</th><th scope="col">Working on</th><th scope="col">Latest result</th><th scope="col">Last log (PT)</th></tr></thead>
+<tbody><tr><th scope="row">Zen (was Jack)</th><td>TwoComma News site, TwoComma Trade site, YNWA hub, TwoComma Read, PropRuleWatch, 1892 Reds LFC site</td><td>Nov 2 afternoon: TwoComma Read updated (HPMOR ch01 v9, RR ch01 v2) with the password gate verified, and the Nov 2 PM news digest deployed. Monday review that day found Beehiiv signed out. Nothing logged since, including the Nov 4 and Nov 5 briefs Morgans sent.</td><td>Nov 2, 2:19 PM</td></tr><tr><th scope="row">Morgans</th><td>TwoComma News briefs and Buffer drafts</td><td>This morning's Asia (5 items), World (4, after one retry from chat when the routine was interrupted) and crypto and markets (5) briefs all passed checks. Routines resumed after the pause; the old separate Entertainment, US and Politics routines were deleted at your request.</td><td>Nov 5, 5:28 AM</td></tr><tr><th scope="row">Tobi</th><td>Weekday 8 AM brief, price tracker, iPhone watcher, Lems order, subscription follow-ups</td><td>The iPhone watcher died at 2:03 AM, was restarted at 3:55 AM and has been healthy since (latest 5:59 AM, no stock). Resume of its other paused routines needed chat (item 1).</td><td>Nov 5, 5:59 AM</td></tr><tr><th scope="row">L (was Reo)</th><td>Daily trade brief, stocks course study, calibration log</td><td>Stocks course lessons 73 to 77 recorded overnight, paused for your go. Nov 4: trade brief all FLAT and validated; GPS tracker unchanged after the CryptoCrew re-sign-in.</td><td>Nov 5, 1:31 AM</td></tr><tr><th scope="row">Ace (was Conan)</th><td>Legal research; real estate course study</td><td>Resumed at 16.4 on your go and has recorded through 20.8; transcribing, next section started.</td><td>Nov 5, 4:51 AM</td></tr><tr><th scope="row">Boa</th><td>Graphics; comic-craft lessons for the book-to-manga skill</td><td>Delivered the high-quality Team TwoComma logo (Zen put it on YNWA Nov 2). Paused the One Piece study for 48 hours on Nov 2, due back Nov 4 at 10:55 PM; no log line on the resume.</td><td>Nov 1, 12:50 PM</td></tr><tr><th scope="row">Levi</th><td>Daily income-improvement scan</td><td>Scan resumed Nov 4 after the pause. Last scan (Nov 2) sent one keeper, a PropRuleWatch sponsor slot, to Gojo.</td><td>Nov 4, 11:01 PM</td></tr><tr><th scope="row">dr eggbot</th><td>Bot design, health checks, routinizer pilot</td><td>Pilot baseline saved (0 page-check wakes in the last 7 days); page-check script built, tested and running; design sent to Zen. Correction review and routine health check resumed by you Nov 4.</td><td>Nov 5, 4:07 AM</td></tr><tr><th scope="row">Klopp</th><td>1892 Reds LFC site data, your 14-point revamp</td><td>Daily and weekly routines resumed Nov 4. Last results: Nov 2 news and fixtures, with the Carabao Cup quarterfinal against Bournemouth added (date to be confirmed).</td><td>Nov 4, 10:56 PM</td></tr></tbody>
+</table>
+</div>
+</section>
+<section class="section" id="rules-check" aria-labelledby="rules-check-heading">
+<h2 id="rules-check-heading">Rules check</h2>
+<aside class="callout" role="note" data-tone="warning"><p class="kicker">Warning</p><p>Sixteen open board rows are more than 2 days old. Tobi: price tracker, morning brief, NY Life (still says awaiting approval though it's done), creator sub, iPhone watch, Lems order, BofA check. Zen: PropRuleWatch Monday review, template ideas, TwoComma News site. L: FOMC dates (the event_stress.py edit is still marked NEEDS REVIEW) and calibration log. Morgans: TwoComma News brief, TwoComma News site, short video. Shared: the 1892 Reds LFC site (Oct 28).</p></aside>
+<p class="prose">Missing logs for rolled-out changes: Zen has no log line for the Nov 2 to 4 pause or anything after Nov 2, 2:19 PM, and Boa logged neither the pause nor the resume (only a board bullet). Board format: the routinizer row uses a status (scheduled) that isn't on the list, Zen's two GitHub rows are still missing columns and dates, and Ace's and Boa's items are bullets under the table instead of rows. Log format: Ace's lines use UTC times, L's recent lines and Morgans' Nov 3 and 4 lines aren't in the five-field format, and Levi's Nov 4 resume line has no time.</p>
+</section>
+</main>
+</body>
+</html>
