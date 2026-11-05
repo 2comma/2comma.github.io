@@ -18,6 +18,7 @@ if [[ "${1:-}" == "ynwa" ]]; then
   cat >&2 <<EOF
 public-mirrors: YNWA is not mirrored from this hook.
 The Cloudflare dashboard is the deploy route. This hook does not upload and does not run by itself.
+GitHub /ynwa/ redirects to https://2comma.github.io/ and the handoff will not copy the site over that redirect.
 After the dashboard shows the upload succeeded, run:
   PUBLIC_MIRROR_REPO=/path/to/existing-mirror-checkout $HERE/ynwa-dashboard-handoff.sh --zip /workspace/ynwa-deploy.zip --deployment-id DEPLOYMENT_ID --digest SHA256 --confirm-dashboard-success
 EOF
