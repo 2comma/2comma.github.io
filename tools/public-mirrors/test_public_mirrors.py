@@ -448,7 +448,7 @@ class HookTests(unittest.TestCase):
         self.assertEqual(hook.returncode, 2)
         self.assertIn("not installed", hook.stderr)
         sync = subprocess.run(
-            [str(HERE / "sync.sh"), "tcr", str(YNWA_FIXTURE)],
+            [str(HERE / "sync.sh"), "canvas", str(YNWA_FIXTURE)],
             capture_output=True,
             text=True,
         )
@@ -478,6 +478,21 @@ class HookTests(unittest.TestCase):
         )
         self.assertEqual(ynwa.returncode, 1)
         self.assertIn("dashboard", ynwa.stderr)
+        for blocked, needle in (
+            ("read", "Read"),
+            ("trade", "Trade"),
+            ("team-twocomma", "Team TwoComma"),
+        ):
+            result = subprocess.run(
+                [str(HERE / "sync.sh"), blocked, str(TEAM_FIXTURE)],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1, blocked)
+            self.assertIn(needle, result.stderr, blocked)
+            with self.assertRaises(MirrorError):
+                prepare(blocked, str(TEAM_FIXTURE), str(HERE / "fixtures" / f"must-not-write-{blocked}"))
+            self.assertFalse((HERE / "fixtures" / f"must-not-write-{blocked}").exists())
         hook_ynwa = subprocess.run(
             [str(HERE / "integration-hook.sh"), "ynwa", str(YNWA_FIXTURE)],
             capture_output=True,

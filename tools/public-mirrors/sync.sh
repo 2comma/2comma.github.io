@@ -17,6 +17,20 @@ case "$ARTIFACT" in
     exit 1
     ;;
 esac
+case "$TARGET" in
+  read|tcr)
+    echo "public-mirrors: ERROR Read is a server-side password gate. No Read content is published." >&2
+    exit 1
+    ;;
+  trade|tct)
+    echo "public-mirrors: ERROR Trade is a server-side password gate. No Trade content is published." >&2
+    exit 1
+    ;;
+  team-twocomma)
+    echo "public-mirrors: ERROR team.twocommanews.com is the private Team TwoComma canvas, not the sanitized /team/ snapshot. No raw Team mirror is published." >&2
+    exit 1
+    ;;
+esac
 if [[ "$TARGET" != "ynwa" && "$TARGET" != "team" ]]; then
   echo "public-mirrors: ERROR unknown target page: $TARGET" >&2
   exit 1
