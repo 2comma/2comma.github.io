@@ -20,6 +20,8 @@ The GitHub Pages root is this public hub with the same asset paths as the Cloudf
 
 The five links are not five content mirrors. `/news/` and `/lfc/` are the existing public mirrors. `/team/` is only the sanitized Team Status snapshot for canvas `7160075c-3e2e-45e1-9e05-4a2b2a08f087`. The domain `team.twocommanews.com` redirects to a different private Team TwoComma canvas, and this repository does not mirror that canvas. `/read/` and `/trade/` have no pages here. Inventory on Nov 5 found Read as a private server-side gate returning 401 with noindex, and Trade as the same kind of gate. GitHub's docs say a Pages site is public on the internet even when its repository is private, and that Pages should not be used to send passwords ([publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site), [HTTPS](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https)). Private Pages visibility is an Enterprise Cloud feature for project sites, not for an organization site such as `2comma.github.io`, and it checks GitHub repository access rather than a site password ([visibility](https://docs.github.com/en/enterprise-cloud@latest/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site)). Stripping the worker or adding a client-side password would publish the private content. Read and Trade need a server-backed authenticated route off this Pages origin before any content is mirrored. `sync.sh read` and `sync.sh trade` refuse. No placeholder pages are added.
 
+`encrypted-static/` is a separate research prototype. It encrypts a made-up PNG and PDF with WebCrypto PBKDF2-HMAC-SHA-256 and AES-256-GCM. It is not a mirror, `sync.sh` does not publish it, and it must not be copied to `/read/` or `/trade/`. A real password never belongs in this directory. See `encrypted-static/README.md`.
+
 The news deploy script on the box still mirrors before Cloudflare success, and both the news and LFC mirror scripts reset a checkout and stage broadly. They are not in this repository and are not changed here. This tool locks one checkout and pushes fast-forward only for the paths it owns. Pointing those other scripts at the same lock is a later decision.
 
 Team artifact:
@@ -96,6 +98,7 @@ Do not add cron, a GitHub Action, or a Cloudflare token. The scripts do not read
 
 ```bash
 python3 /path/to/public-mirrors/test_public_mirrors.py
+node /path/to/public-mirrors/encrypted-static/test_encrypted_static.mjs
 ```
 
 The suite uses the fixtures shipped in this directory and disposable git repositories. It does not read a parent checkout.
