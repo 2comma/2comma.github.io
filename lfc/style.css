@@ -95,3 +95,8 @@ footer{border-top:1px solid var(--line);margin-top:var(--s6);padding:var(--s4) 0
 
 .mlink{font-size:.8em;white-space:nowrap}
 @media(max-width:599px){.tm .ab{display:none}}
+
+/* competition shortcut row (home + fixtures) */
+.compbar{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0 var(--s4)}
+.compbar a.comp{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 var(--s3);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);color:var(--muted);text-decoration:none;font:700 var(--fs-xs) var(--font-head);letter-spacing:1px;text-transform:uppercase}
+.compbar a.comp:hover{color:var(--text);border-color:var(--brand)}
