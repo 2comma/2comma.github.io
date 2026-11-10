@@ -18,6 +18,7 @@ day/2026-11-06.html
 day/2026-11-07.html
 day/2026-11-08.html
 day/2026-11-09.html
+day/2026-11-10.html
 week/2026-W43.html
 week/2026-W44.html
 week/2026-W45.html
@@ -63,6 +64,7 @@ business/day/2026-11-06.html
 business/day/2026-11-07.html
 business/day/2026-11-08.html
 business/day/2026-11-09.html
+business/day/2026-11-10.html
 business/week/2026-W43.html
 business/week/2026-W44.html
 business/week/2026-W45.html
@@ -738,6 +740,10 @@ item/2026-11-09-world-2.html
 item/2026-11-09-world-3.html
 item/2026-11-09-world-4.html
 item/2026-11-09-world-5.html
+item/2026-11-10-am-1.html
+item/2026-11-10-am-2.html
+item/2026-11-10-am-3.html
+item/2026-11-10-am-4.html
 zh-hant/index.html
 zh-hant/day/2026-10-21.html
 zh-hant/day/2026-10-22.html
@@ -758,6 +764,7 @@ zh-hant/day/2026-11-06.html
 zh-hant/day/2026-11-07.html
 zh-hant/day/2026-11-08.html
 zh-hant/day/2026-11-09.html
+zh-hant/day/2026-11-10.html
 zh-hant/week/2026-W43.html
 zh-hant/week/2026-W44.html
 zh-hant/week/2026-W45.html
@@ -803,6 +810,7 @@ zh-hant/business/day/2026-11-06.html
 zh-hant/business/day/2026-11-07.html
 zh-hant/business/day/2026-11-08.html
 zh-hant/business/day/2026-11-09.html
+zh-hant/business/day/2026-11-10.html
 zh-hant/business/week/2026-W43.html
 zh-hant/business/week/2026-W44.html
 zh-hant/business/week/2026-W45.html
@@ -1478,6 +1486,10 @@ zh-hant/item/2026-11-09-world-2.html
 zh-hant/item/2026-11-09-world-3.html
 zh-hant/item/2026-11-09-world-4.html
 zh-hant/item/2026-11-09-world-5.html
+zh-hant/item/2026-11-10-am-1.html
+zh-hant/item/2026-11-10-am-2.html
+zh-hant/item/2026-11-10-am-3.html
+zh-hant/item/2026-11-10-am-4.html
 zh-hans/index.html
 zh-hans/day/2026-10-21.html
 zh-hans/day/2026-10-22.html
@@ -1498,6 +1510,7 @@ zh-hans/day/2026-11-06.html
 zh-hans/day/2026-11-07.html
 zh-hans/day/2026-11-08.html
 zh-hans/day/2026-11-09.html
+zh-hans/day/2026-11-10.html
 zh-hans/week/2026-W43.html
 zh-hans/week/2026-W44.html
 zh-hans/week/2026-W45.html
@@ -1543,6 +1556,7 @@ zh-hans/business/day/2026-11-06.html
 zh-hans/business/day/2026-11-07.html
 zh-hans/business/day/2026-11-08.html
 zh-hans/business/day/2026-11-09.html
+zh-hans/business/day/2026-11-10.html
 zh-hans/business/week/2026-W43.html
 zh-hans/business/week/2026-W44.html
 zh-hans/business/week/2026-W45.html
@@ -2218,3 +2232,7 @@ zh-hans/item/2026-11-09-world-2.html
 zh-hans/item/2026-11-09-world-3.html
 zh-hans/item/2026-11-09-world-4.html
 zh-hans/item/2026-11-09-world-5.html
+zh-hans/item/2026-11-10-am-1.html
+zh-hans/item/2026-11-10-am-2.html
+zh-hans/item/2026-11-10-am-3.html
+zh-hans/item/2026-11-10-am-4.html
