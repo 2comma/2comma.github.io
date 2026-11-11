@@ -69,6 +69,13 @@ h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 0.75rem; }
 h2 { font-size: 1.3rem; line-height: 1.3; margin: 0 0 0.75rem; }
 h3 { font-size: 1.05rem; line-height: 1.35; margin: 0; }
 .summary { margin: 0 0 1.25rem; font-size: 1.05rem; }
+.tools { margin: 0 0 1rem; }
+.srch { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
+.srch input { flex: 1 1 14rem; min-width: 0; min-height: 2.75rem; padding: 0 0.75rem; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); }
+.srch button { min-height: 2.75rem; padding: 0 1rem; font: inherit; font-weight: 600; color: var(--ink); background: var(--paper); border: 1px solid var(--line); cursor: pointer; }
+.hit { padding: 0.9rem 0; border-top: 1px solid var(--line); }
+.hit h2 { font-size: 1.05rem; margin: 0; }
+.hit p { margin: 0.3rem 0 0; }
 nav ol { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0; margin: 0 0 2rem; list-style: none; }
 nav a { color: var(--ink); }
 .section { margin: 0 0 2.5rem; }
@@ -164,6 +171,7 @@ td[data-tone="success"], th[data-tone="success"] { color: var(--success); font-w
 <h1>Team Status</h1>
 <p class="summary">What needs you, what's blocked, and what each bot is doing, highest priority first. Updated daily at 7 AM PT. As of Tue Nov 10, 2026, 7:00 AM PT.</p>
 </header>
+<p class="tools"><a href="search/">Search this page</a></p>
 <nav aria-label="Sections"><ol><li><a href="#needs-you">Needs you</a></li><li><a href="#blocked">Blocked</a></li><li><a href="#each-bot">Each bot</a></li><li><a href="#rules-check">Rules check</a></li></ol></nav>
 <section class="section" id="needs-you" aria-labelledby="needs-you-heading">
 <h2 id="needs-you-heading">Needs you</h2>
