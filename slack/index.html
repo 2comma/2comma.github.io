@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>TwoComma Slack</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <link rel="icon" href="/favicon.svg">
 <style>
 :root{color-scheme:light dark;--bg:#f6f6f4;--ink:#1c1917;--muted:#57534e;--line:#d6d3d1;--paper:#fff;--accent:#4a154b}
@@ -22,29 +22,32 @@ h1{margin:0 0 4px;font-size:28px}p.sub{margin:0 0 24px;color:var(--muted)}
 .card:hover,.card:focus{border-color:var(--accent);outline:none}
 .name{font-weight:700;font-size:18px}.role{color:var(--muted);font-size:14px}.what{margin-top:6px;font-size:14px}.go{margin-top:10px;color:var(--accent);font-weight:600;font-size:14px}
 footer{margin-top:32px;color:var(--muted);font-size:13px}a.back{color:var(--muted)}
+.badge{display:inline-block;min-width:22px;padding:0 7px;margin-right:8px;border-radius:11px;background:#e01e5a;color:#fff;font-size:13px;line-height:22px;text-align:center;vertical-align:2px}.badge[hidden]{display:none}#upd{color:var(--muted);font-size:13px;margin:-14px 0 20px}
 </style>
 </head>
 <body>
 <main>
 <h1>TwoComma Slack</h1>
-<p class="sub">Tap a bot to open its direct chat in Slack. You'll need to be signed in to twocomma.slack.com.</p>
+<p class="sub">Tap a bot to open its direct chat in Slack. Red numbers are bot messages since your last reply. You'll need to be signed in to twocomma.slack.com.</p>
 <div class="top">
 <a class="btn" href="https://twocomma.slack.com/" target="_blank" rel="noopener noreferrer">Open the workspace</a>
 <a class="btn alt" href="https://app.slack.com/client" target="_blank" rel="noopener noreferrer">Slack in the browser</a>
 </div>
+<p id="upd">New-message counts load here.</p>
 <div class="grid">
-<a class="card" href="https://twocomma.slack.com/archives/D0CGPTRV70A" target="_blank" rel="noopener noreferrer"><span class="name">Gojo</span><span class="role">Chief of Staff</span><span class="what">Team rules, priorities and status</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CHJG5HTQ8" target="_blank" rel="noopener noreferrer"><span class="name">Zen</span><span class="role">Webmaster</span><span class="what">Sites, PropRuleWatch and JournalCompare</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGPV3B1QA" target="_blank" rel="noopener noreferrer"><span class="name">Tobi</span><span class="role">Personal Assistant</span><span class="what">Errands, research and reminders</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGJRZK7DK" target="_blank" rel="noopener noreferrer"><span class="name">L</span><span class="role">Trader</span><span class="what">Trade calls</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGTRT41EY" target="_blank" rel="noopener noreferrer"><span class="name">Morgans</span><span class="role">Editor-in-Chief</span><span class="what">TwoComma News</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGS20F8HX" target="_blank" rel="noopener noreferrer"><span class="name">Levi</span><span class="role">Researcher</span><span class="what">Reading posts, articles and videos</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CHJG835EU" target="_blank" rel="noopener noreferrer"><span class="name">Boa</span><span class="role">Multimedia Specialist</span><span class="what">Graphics and video</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGPVC5MFC" target="_blank" rel="noopener noreferrer"><span class="name">Klopp</span><span class="role">Gegenpresser</span><span class="what">Liverpool and the Premier League</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CGHTXBQMR" target="_blank" rel="noopener noreferrer"><span class="name">Ace</span><span class="role">Attorney</span><span class="what">Legal and compliance questions</span><span class="go">Open chat in Slack &rarr;</span></a>
-<a class="card" href="https://twocomma.slack.com/archives/D0CHJG2LBTJ" target="_blank" rel="noopener noreferrer"><span class="name">dr eggbot</span><span class="role">MasterBotter</span><span class="what">Bot design</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGPTRV70A" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGPTRV70A" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Gojo</span><span class="role">Chief of Staff</span><span class="what">Team rules, priorities and status</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CHJG5HTQ8" href="https://app.slack.com/client/T0CGJHN7TQV/D0CHJG5HTQ8" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Zen</span><span class="role">Webmaster</span><span class="what">Sites, PropRuleWatch and JournalCompare</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGPV3B1QA" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGPV3B1QA" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Tobi</span><span class="role">Personal Assistant</span><span class="what">Errands, research and reminders</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGJRZK7DK" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGJRZK7DK" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>L</span><span class="role">Trader</span><span class="what">Trade calls</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGTRT41EY" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGTRT41EY" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Morgans</span><span class="role">Editor-in-Chief</span><span class="what">TwoComma News</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGS20F8HX" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGS20F8HX" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Levi</span><span class="role">Researcher</span><span class="what">Reading posts, articles and videos</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CHJG835EU" href="https://app.slack.com/client/T0CGJHN7TQV/D0CHJG835EU" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Boa</span><span class="role">Multimedia Specialist</span><span class="what">Graphics and video</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGPVC5MFC" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGPVC5MFC" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Klopp</span><span class="role">Gegenpresser</span><span class="what">Liverpool and the Premier League</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CGHTXBQMR" href="https://app.slack.com/client/T0CGJHN7TQV/D0CGHTXBQMR" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>Ace</span><span class="role">Attorney</span><span class="what">Legal and compliance questions</span><span class="go">Open chat in Slack &rarr;</span></a>
+<a class="card" data-dm="D0CHJG2LBTJ" href="https://app.slack.com/client/T0CGJHN7TQV/D0CHJG2LBTJ" target="_blank" rel="noopener noreferrer"><span class="name"><span class="badge" hidden></span>dr eggbot</span><span class="role">MasterBotter</span><span class="what">Bot design</span><span class="go">Open chat in Slack &rarr;</span></a>
 </div>
 <footer>Slack doesn't allow its chat to be shown inside other websites, so each link opens Slack in a new tab. <a class="back" href="/">Back to the hub</a></footer>
 </main>
+<script src="counts.js"></script>
 </body>
 </html>
