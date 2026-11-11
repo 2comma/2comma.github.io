@@ -235,6 +235,9 @@ class _Renderer:
             "<head>\n"
             '<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+            # Owner t420u (Nov 10, 2026): Team Status stays out of search engines. GitHub Pages
+            # cannot send X-Robots-Tag, so the meta tag is the only lever; never add a robots Disallow.
+            '<meta name="robots" content="noindex,nofollow,noarchive">\n'
             f"<title>{_esc(title)}</title>\n"
             + (f'<meta name="description" content="{_attr(summary)}">\n' if summary else "")
             + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src \'self\' data:; base-uri \'none\'; form-action \'none\'; frame-ancestors \'none\'">\n'

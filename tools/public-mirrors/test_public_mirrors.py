@@ -153,6 +153,8 @@ class PrepareTests(unittest.TestCase):
         self.assertNotIn("grok/canvas", page)
         self.assertNotIn("<script", page.lower())
         self.assertIn('lang="en"', page)
+        # Owner t420u: Team Status is excluded from search engines (meta only; Pages has no headers).
+        self.assertIn('<meta name="robots" content="noindex,nofollow,noarchive">', page)
         self.assertIn("<table", page)
         self.assertIn('scope="col"', page)
         self.assertIn('scope="row"', page)
