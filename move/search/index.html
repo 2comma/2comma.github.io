@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>Search · TwoComma Move</title>
+<link rel="icon" href="/move/favicon-32.png"><link rel="apple-touch-icon" href="/move/icon-192.png"><meta name="theme-color" content="#0B0F14">
+<style>
+:root{--bg:light-dark(#f6f7f9,#0B0F14);--card:light-dark(#fff,#141a22);--card2:light-dark(#f1f3f6,#10151c);--fg:light-dark(#0B0F14,#EEF2F6);--mute:light-dark(#56606c,#9aa6b2);--bd:light-dark(#dde2e8,#26303c);--acc:light-dark(#00a866,#00E08A);--amb:light-dark(#b97800,#FFB020);color-scheme:light dark}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--acc)}.disc{background:light-dark(#fff4d6,#3a2a00);color:light-dark(#5a3d00,#FFD580);border-top:1px solid var(--amb);padding:8px 14px;font-size:.86rem;line-height:1.4;text-align:center}
+header{max-width:860px;margin:0 auto;padding:18px 16px 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header a.home{display:block;line-height:0}header img.lockup{height:44px;width:auto;max-width:100%}
+nav.lv{max-width:860px;margin:0 auto;padding:6px 16px 0;display:flex;gap:8px;flex-wrap:wrap}
+nav.lv a{padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--fg);text-decoration:none;font-weight:600;font-size:.95rem}
+nav.lv a[aria-current]{background:var(--acc);color:#0B0F14;border-color:var(--acc)}
+main{max-width:860px;margin:0 auto;padding:12px 16px 40px}h1{font-size:1.7rem;margin:14px 0 6px}h2{font-size:1.25rem}
+.lead{color:var(--mute)}.targets{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.targets div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;font-size:.92rem}
+.tools{display:flex;gap:8px;margin:16px 0 8px}.tools button{font:inherit;font-size:.88rem;padding:7px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+details.sec{background:var(--card);border:1px solid var(--bd);border-radius:14px;margin:10px 0;overflow:hidden}
+details.sec>summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:1.08rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.sec>summary::-webkit-details-marker{display:none}details.sec>summary::after{content:"+";color:var(--acc);font-size:1.4rem;line-height:1}details.sec[open]>summary::after{content:"\2212"}
+details.sec .opt{font-size:.75rem;font-weight:700;color:var(--amb);border:1px solid var(--amb);border-radius:999px;padding:1px 8px;margin-left:8px}
+.body{padding:0 16px 14px}.body li{margin:4px 0}
+.ex{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:12px 0}
+.ex h3{margin:0 0 4px;font-size:1.02rem}.ex .slot{font-size:.75rem;color:var(--acc);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ex .meta{font-size:.9rem;color:var(--mute);margin:2px 0}.ex p{margin:6px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:14px 0}
+.cards a{display:block;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;color:var(--fg);text-decoration:none}
+.cards a b{display:block;font-size:1.15rem;color:var(--acc);margin-bottom:4px}.cards a span{font-size:.9rem;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:20px 16px 24px;color:var(--mute);font-size:.85rem;border-top:1px solid var(--bd)}
+footer a{color:var(--mute)}
+.srch{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.srch input{flex:1 1 220px;min-width:0;font:inherit;padding:10px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--fg)}.srch button{font:inherit;font-weight:600;padding:10px 16px;border-radius:12px;border:1px solid var(--acc);background:var(--acc);color:#0B0F14;cursor:pointer}
+.hit{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:10px 0}.hit a{font-weight:700;text-decoration:none}.hit .meta{font-size:.85rem;color:var(--mute)}.hit p{margin:4px 0 0}
+</style></head><body>
+<header><a class="home" href="/move/" aria-label="TwoComma Move home"><picture><source srcset="/move/tcm-logo-light.svg" media="(prefers-color-scheme: light)"><img class="lockup" src="/move/tcm-logo.svg" alt="TwoComma Move" width="270" height="44"></picture></a></header>
+<nav class="lv" aria-label="Levels"><a href="/move/beginner/">Beginner</a><a href="/move/intermediate/">Intermediate</a><a href="/move/advanced/">Advanced</a><a href="/move/search/" aria-current="page">Search</a></nav>
+<main><h1>Search</h1><form class="srch" id="sf" role="search" action="/move/search/" method="get" data-src="/move/search.json"><label for="sq" style="position:absolute;left:-9999px">Search the plan</label><input id="sq" name="q" type="search" placeholder="Search exercises, sections, levels" autocomplete="off" enterkeyhint="search"><button type="submit">Search</button></form><p class="lead" id="sst" aria-live="polite">104 entries. Search needs JavaScript.</p><div id="sr"></div></main>
+<footer>TwoComma Move (TCM) · <a href="/">YNWA</a></footer>
+<div class="disc" role="note"><strong>This is not medical advice. Talk to your doctor before you start any training or eating plan.</strong></div>
+<script>
+document.querySelectorAll('[data-all]').forEach(function(b){b.addEventListener('click',function(){var o=b.dataset.all==='open';document.querySelectorAll('details.sec').forEach(function(d){d.open=o})})});
+if(location.hash){var t=document.getElementById(location.hash.slice(1));if(t&&t.tagName==='DETAILS')t.open=true}
+</script><script>
+(function(){var f=document.getElementById('sf'),q=document.getElementById('sq'),out=document.getElementById('sr'),st=document.getElementById('sst');
+var src=f.getAttribute('data-src'),base=src.replace(/search\.json$/,''),D=null;
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function draw(){if(!D)return;var t=norm(q.value).split(/\s+/).filter(Boolean);
+if(!t.length){st.textContent=D.count+' entries across every level. Type to search.';out.innerHTML='';return}
+var r=D.items.filter(function(it){var h=it._h||(it._h=norm(it.t+' '+it.x+' '+it.s));for(var i=0;i<t.length;i++)if(h.indexOf(t[i])<0)return false;return true});
+if(!r.length){st.textContent='';out.innerHTML='<p class="noresult">No results for \u201c'+esc(q.value)+'\u201d. Try fewer or different words.</p>';return}
+st.textContent=r.length+(r.length===1?' result':' results');
+out.innerHTML=r.slice(0,100).map(function(it){return '<div class="hit"><a href="'+esc(base+it.u)+'">'+esc(it.t)+'</a><div class="meta">'+esc(it.s)+'</div>'+(it.x?'<p>'+esc(it.x)+'</p>':'')+'</div>'}).join('')}
+q.value=new URLSearchParams(location.search).get('q')||'';
+f.addEventListener('submit',function(e){e.preventDefault();draw()});q.addEventListener('input',draw);
+st.textContent='Loading\u2026';fetch(src,{credentials:'same-origin'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){D=j;draw()}).catch(function(){st.textContent='Search index could not be loaded.'})})();
+</script></body></html>
