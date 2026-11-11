@@ -1,23 +1,41 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow,noarchive"><title>TwoComma Move</title><link rel="icon" href="/move/favicon-32.png">
-<link rel="canonical" href="https://move.twocommanews.com/"><meta name="color-scheme" content="dark light">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>TwoComma Move</title>
+<link rel="icon" href="/move/favicon-32.png"><link rel="apple-touch-icon" href="/move/icon-192.png"><meta name="theme-color" content="#0B0F14">
 <style>
-:root{--bg:#0B0F14;--fg:#E6EDF3;--mute:#9aa6b2;--bd:#26303c;--acc:#00E08A;--card:#141a22}
-@media(prefers-color-scheme:light){:root{--bg:#F6F7F9;--fg:#0B0F14;--mute:#56606c;--bd:#dde2e8;--acc:#00a866;--card:#fff}}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
-.disc{background:#3a2a00;color:#FFD580;border-top:1px solid #FFB020;padding:10px 16px;font-size:.9rem;text-align:center}
-@media(prefers-color-scheme:light){.disc{background:#fff4d6;color:#5a3d00}}
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;gap:18px}
-main img{width:min(520px,90vw);height:auto}p{margin:0;color:var(--mute);max-width:520px}
-a.go{display:inline-block;padding:12px 22px;border-radius:12px;background:var(--acc);color:#0B0F14;font-weight:700;text-decoration:none}
-footer{padding:16px;text-align:center;font-size:.85rem}footer a{color:var(--mute)}
+:root{--bg:light-dark(#f6f7f9,#0B0F14);--card:light-dark(#fff,#141a22);--card2:light-dark(#f1f3f6,#10151c);--fg:light-dark(#0B0F14,#EEF2F6);--mute:light-dark(#56606c,#9aa6b2);--bd:light-dark(#dde2e8,#26303c);--acc:light-dark(#00a866,#00E08A);--amb:light-dark(#b97800,#FFB020);color-scheme:light dark}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--acc)}.disc{background:light-dark(#fff4d6,#3a2a00);color:light-dark(#5a3d00,#FFD580);border-top:1px solid var(--amb);padding:8px 14px;font-size:.86rem;line-height:1.4;text-align:center}
+header{max-width:860px;margin:0 auto;padding:18px 16px 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header a.home{display:block;line-height:0}header img.lockup{height:44px;width:auto;max-width:100%}
+nav.lv{max-width:860px;margin:0 auto;padding:6px 16px 0;display:flex;gap:8px;flex-wrap:wrap}
+nav.lv a{padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--fg);text-decoration:none;font-weight:600;font-size:.95rem}
+nav.lv a[aria-current]{background:var(--acc);color:#0B0F14;border-color:var(--acc)}
+main{max-width:860px;margin:0 auto;padding:12px 16px 40px}h1{font-size:1.7rem;margin:14px 0 6px}h2{font-size:1.25rem}
+.lead{color:var(--mute)}.targets{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.targets div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;font-size:.92rem}
+.tools{display:flex;gap:8px;margin:16px 0 8px}.tools button{font:inherit;font-size:.88rem;padding:7px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+details.sec{background:var(--card);border:1px solid var(--bd);border-radius:14px;margin:10px 0;overflow:hidden}
+details.sec>summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:1.08rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.sec>summary::-webkit-details-marker{display:none}details.sec>summary::after{content:"+";color:var(--acc);font-size:1.4rem;line-height:1}details.sec[open]>summary::after{content:"\2212"}
+details.sec .opt{font-size:.75rem;font-weight:700;color:var(--amb);border:1px solid var(--amb);border-radius:999px;padding:1px 8px;margin-left:8px}
+.body{padding:0 16px 14px}.body li{margin:4px 0}
+.ex{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:12px 0}
+.ex h3{margin:0 0 4px;font-size:1.02rem}.ex .slot{font-size:.75rem;color:var(--acc);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ex .meta{font-size:.9rem;color:var(--mute);margin:2px 0}.ex p{margin:6px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:14px 0}
+.cards a{display:block;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;color:var(--fg);text-decoration:none}
+.cards a b{display:block;font-size:1.15rem;color:var(--acc);margin-bottom:4px}.cards a span{font-size:.9rem;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:20px 16px 24px;color:var(--mute);font-size:.85rem;border-top:1px solid var(--bd)}
+footer a{color:var(--mute)}
 </style></head><body>
-<main>
-<picture><source srcset="/move/tcm-logo-light.png" media="(prefers-color-scheme: light)"><img src="/move/tcm-logo.png" alt="TwoComma Move (TCM)" width="567" height="93"></picture>
-<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">TwoComma Move</h1>
-<p>A private, password-protected personal training plan.</p>
-<a class="go" href="https://move.twocommanews.com">Open TwoComma Move</a>
-</main>
-<footer><a href="/">YNWA</a></footer>
+<header><a class="home" href="/move/" aria-label="TwoComma Move home"><picture><source srcset="/move/tcm-logo-light.svg" media="(prefers-color-scheme: light)"><img class="lockup" src="/move/tcm-logo.svg" alt="TwoComma Move" width="270" height="44"></picture></a></header>
+<nav class="lv" aria-label="Levels"><a href="/move/beginner/">Beginner</a><a href="/move/intermediate/">Intermediate</a><a href="/move/advanced/">Advanced</a></nav>
+<main><h1>TwoComma Move</h1>
+<p class="lead">A training plan built from Wanhee's Minimalist Training course (Functional Bodyweight Routine 2.0, Upper/Lower split).</p>
+<div class="cards"><a href="/move/beginner/"><b>Beginner</b><span>You're here while you work up to a full push-up, a first chin-up or pull-up, and a full Bulgarian split squat; while daily protein is about 100 g; and while daily steps start at 5k and ramp slowly.</span></a><a href="/move/intermediate/"><b>Intermediate</b><span>You're here when full push-ups, chin-ups or pull-ups, and full Bulgarian split squats are your working sets (not just holds and mini ranges); after you've held 100 g of protein a day for a month and are moving to 130 g; and while steps are ramping through 6k and 8k toward 10k.</span></a><a href="/move/advanced/"><b>Advanced</b><span>You're here when Intermediate variations are easy at the top of the rep range (about 10–12 good reps), so you move to harder variations: pike or advanced push-ups, weighted or advanced pull-ups, weighted Bulgarian split squats, and L-sits or weighted hanging raises; daily protein is 150 g+; and steps are a consistent 10k.</span></a></div>
+<details class="sec" id="how-levels"><summary><span>How the levels work</span></summary><div class="body"><p>Beginner / Intermediate / Advanced are the course's skill progressions applied to the same home Upper/Lower routine. They are not the course's three program phases (Aesthetic → Functional → Athletic, about three months each).</p><p>Move up a variation at 3×10 good form (Functional Bodyweight Routine 2.0 PDF). Broader bodyweight rule: 5–12 reps, and once 12 is easy make the exercise harder (Principle 1, 0:33–1:12). Bulgarian split squats: Intermediate is 3×12, then weighted (Key Lower Body Exercises PDF).</p></div></details></main>
+<footer>TwoComma Move (TCM) · <a href="/">YNWA</a></footer>
 <div class="disc" role="note"><strong>This is not medical advice. Talk to your doctor before you start any training or eating plan.</strong></div>
-</body></html>
+<script>
+document.querySelectorAll('[data-all]').forEach(function(b){b.addEventListener('click',function(){var o=b.dataset.all==='open';document.querySelectorAll('details.sec').forEach(function(d){d.open=o})})});
+if(location.hash){var t=document.getElementById(location.hash.slice(1));if(t&&t.tagName==='DETAILS')t.open=true}
+</script></body></html>
