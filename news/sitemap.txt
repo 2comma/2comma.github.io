@@ -781,6 +781,7 @@ item/2026-11-10-world-2.html
 item/2026-11-10-world-3.html
 item/2026-11-10-world-4.html
 item/2026-11-10-world-5.html
+search/
 zh-hant/index.html
 zh-hant/day/2026-10-21.html
 zh-hant/day/2026-10-22.html
@@ -1564,6 +1565,7 @@ zh-hant/item/2026-11-10-world-2.html
 zh-hant/item/2026-11-10-world-3.html
 zh-hant/item/2026-11-10-world-4.html
 zh-hant/item/2026-11-10-world-5.html
+zh-hant/search/
 zh-hans/index.html
 zh-hans/day/2026-10-21.html
 zh-hans/day/2026-10-22.html
@@ -2347,3 +2349,4 @@ zh-hans/item/2026-11-10-world-2.html
 zh-hans/item/2026-11-10-world-3.html
 zh-hans/item/2026-11-10-world-4.html
 zh-hans/item/2026-11-10-world-5.html
+zh-hans/search/
