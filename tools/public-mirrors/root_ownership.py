@@ -2,14 +2,15 @@
 
 Ownership is exact. The hub owns index.html, favicon.svg, team-logo.svg, and
 image files directly under avatars/ and icons/. It does not own other root
-files, and it does not own news/, lfc/, team/, tools/, or ynwa/.
+files, and it does not own news/, lfc/, team/, tools/, ynwa/, or slack/.
+The /slack page was removed on 2026-11-11; a root sync must not recreate it.
 """
 
 from __future__ import annotations
 
 import re
 
-PROTECTED_PREFIXES = ("news/", "lfc/", "team/", "tools/", "ynwa/")
+PROTECTED_PREFIXES = ("news/", "lfc/", "team/", "tools/", "ynwa/", "slack/")
 PROTECTED_EXACT = {
     "README.md",
     ".gitignore",

@@ -1110,5 +1110,53 @@ def _zip(path: Path, files: dict[str, bytes]) -> None:
             archive.writestr(name, data)
 
 
+
+class SlackIconTests(unittest.TestCase):
+    """Owner 2026-11-11: Slack icon to the right of YNWA; /slack must not return."""
+
+    def test_icon_is_injected_beside_ynwa_and_is_idempotent(self) -> None:
+        from hub_links import ensure_slack_icon, rewrite_root_hub_links, SLACK_HREF
+        html = '<style>h1{margin:0 0 32px}</style><h1>YNWA</h1><div class="grid">'
+        once = ensure_slack_icon(html)
+        self.assertIn('class="ynwa-title"', once)
+        self.assertIn(f'href="{SLACK_HREF}"', once)
+        self.assertIn('aria-label="TwoComma Slack"', once)
+        self.assertIn('target="_blank"', once)
+        self.assertIn('rel="noopener"', once)
+        self.assertIn("<svg", once)
+        self.assertEqual(once, ensure_slack_icon(once))
+        self.assertEqual(once.count(SLACK_HREF), 1)
+        src = '<style>h1{margin:0 0 32px}</style><h1>YNWA</h1><a href="https://team.twocommanews.com">t</a>'
+        out = rewrite_root_hub_links(src)
+        self.assertIn('href="/team/"', out)
+        self.assertIn(f'href="{SLACK_HREF}"', out)
+        self.assertEqual(out, rewrite_root_hub_links(out))
+
+    def test_prepare_root_hub_keeps_icon_and_refuses_slack_dir(self) -> None:
+        from root_ownership import is_owned, is_protected
+        from ynwa_prepare import MirrorError, prepare_root_hub
+        from hub_links import rewrite_root_hub_links, SLACK_HREF
+        self.assertTrue(is_protected("slack/index.html"))
+        self.assertFalse(is_owned("slack/index.html"))
+        self.assertFalse(is_owned("slack/counts.json"))
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        stage = tmp / "stage"
+        prepare_root_hub(str(YNWA_FIXTURE), str(stage))
+        page = (stage / "index.html").read_text(encoding="utf-8")
+        source = (YNWA_FIXTURE / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(page, rewrite_root_hub_links(source))
+        self.assertIn(f'href="{SLACK_HREF}"', page)
+        self.assertIn('aria-label="TwoComma Slack"', page)
+        rejected = tmp / "with-slack"
+        shutil.copytree(YNWA_FIXTURE, rejected)
+        (rejected / "slack").mkdir()
+        (rejected / "slack" / "index.html").write_text("<h1>no</h1>", encoding="utf-8")
+        with self.assertRaises(MirrorError) as caught:
+            prepare_root_hub(str(rejected), str(tmp / "rejected-out"))
+        self.assertIn("slack", str(caught.exception).lower())
+        self.assertFalse((tmp / "rejected-out").exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
