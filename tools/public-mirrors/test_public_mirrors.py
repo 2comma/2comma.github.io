@@ -1112,30 +1112,40 @@ def _zip(path: Path, files: dict[str, bytes]) -> None:
 
 
 class SlackIconTests(unittest.TestCase):
-    """Owner 2026-11-11: Slack icon to the right of YNWA; /slack must not return."""
+    """Owner 2026-11-11: Slack, YouTube, TikTok icons to the right of YNWA; /slack must not return."""
 
     def test_icon_is_injected_beside_ynwa_and_is_idempotent(self) -> None:
-        from hub_links import ensure_slack_icon, rewrite_root_hub_links, SLACK_HREF
+        from hub_links import ensure_slack_icon, rewrite_root_hub_links, SLACK_HREF, YOUTUBE_HREF, TIKTOK_HREF
         html = '<style>h1{margin:0 0 32px}</style><h1>YNWA</h1><div class="grid">'
         once = ensure_slack_icon(html)
         self.assertIn('class="ynwa-title"', once)
         self.assertIn(f'href="{SLACK_HREF}"', once)
         self.assertIn('aria-label="TwoComma Slack"', once)
+        self.assertIn(f'href="{YOUTUBE_HREF}"', once)
+        self.assertIn('aria-label="TwoSnipped on YouTube"', once)
+        self.assertIn(f'href="{TIKTOK_HREF}"', once)
+        self.assertIn('aria-label="TwoSnipped on TikTok"', once)
+        self.assertLess(once.find(SLACK_HREF), once.find(YOUTUBE_HREF))
+        self.assertLess(once.find(YOUTUBE_HREF), once.find(TIKTOK_HREF))
         self.assertIn('target="_blank"', once)
         self.assertIn('rel="noopener"', once)
         self.assertIn("<svg", once)
         self.assertEqual(once, ensure_slack_icon(once))
         self.assertEqual(once.count(SLACK_HREF), 1)
+        self.assertEqual(once.count(YOUTUBE_HREF), 1)
+        self.assertEqual(once.count(TIKTOK_HREF), 1)
         src = '<style>h1{margin:0 0 32px}</style><h1>YNWA</h1><a href="https://team.twocommanews.com">t</a>'
         out = rewrite_root_hub_links(src)
         self.assertIn('href="/team/"', out)
         self.assertIn(f'href="{SLACK_HREF}"', out)
+        self.assertIn(f'href="{YOUTUBE_HREF}"', out)
+        self.assertIn(f'href="{TIKTOK_HREF}"', out)
         self.assertEqual(out, rewrite_root_hub_links(out))
 
     def test_prepare_root_hub_keeps_icon_and_refuses_slack_dir(self) -> None:
         from root_ownership import is_owned, is_protected
         from ynwa_prepare import MirrorError, prepare_root_hub
-        from hub_links import rewrite_root_hub_links, SLACK_HREF
+        from hub_links import rewrite_root_hub_links, SLACK_HREF, YOUTUBE_HREF, TIKTOK_HREF
         self.assertTrue(is_protected("slack/index.html"))
         self.assertFalse(is_owned("slack/index.html"))
         self.assertFalse(is_owned("slack/counts.json"))
@@ -1148,6 +1158,12 @@ class SlackIconTests(unittest.TestCase):
         self.assertEqual(page, rewrite_root_hub_links(source))
         self.assertIn(f'href="{SLACK_HREF}"', page)
         self.assertIn('aria-label="TwoComma Slack"', page)
+        self.assertIn(f'href="{YOUTUBE_HREF}"', page)
+        self.assertIn('aria-label="TwoSnipped on YouTube"', page)
+        self.assertIn(f'href="{TIKTOK_HREF}"', page)
+        self.assertIn('aria-label="TwoSnipped on TikTok"', page)
+        self.assertLess(page.find(SLACK_HREF), page.find(YOUTUBE_HREF))
+        self.assertLess(page.find(YOUTUBE_HREF), page.find(TIKTOK_HREF))
         rejected = tmp / "with-slack"
         shutil.copytree(YNWA_FIXTURE, rejected)
         (rejected / "slack").mkdir()
