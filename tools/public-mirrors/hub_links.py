@@ -37,13 +37,20 @@ def map_mirror_url(url: str) -> str:
     return url
 
 
-# Owner 2026-11-11: Slack, YouTube, and TikTok icons to the right of the YNWA
-# title (order: Slack, YouTube, TikTok). Applied on every root-hub prepare so a
+# Owner 2026-11-11/12: Slack, YouTube, TikTok, and X icons to the right of the YNWA
+# title (order: Slack, YouTube, TikTok, X). Applied on every root-hub prepare so a
 # later ZIP sync cannot drop the icons.
 SLACK_HREF = "https://twocomma.slack.com"
 YOUTUBE_HREF = "https://www.youtube.com/@TwoSnipped"
 TIKTOK_HREF = "https://www.tiktok.com/@twosnipped"
+X_HREF = "https://x.com/twosnipped"
 SLACK_ICON_CSS = (
+    ".ynwa-title{display:flex;align-items:center;gap:14px;margin:0 0 32px}"
+    ".ynwa-title h1{margin:0}"
+    "a.slack-icon,a.youtube-icon,a.tiktok-icon,a.x-icon{display:inline-flex;flex-shrink:0;line-height:0;color:inherit}"
+    "a.slack-icon svg,a.youtube-icon svg,a.tiktok-icon svg,a.x-icon svg{width:2rem;height:2rem;display:block}"
+)
+_OLD_THREE_ICON_CSS = (
     ".ynwa-title{display:flex;align-items:center;gap:14px;margin:0 0 32px}"
     ".ynwa-title h1{margin:0}"
     "a.slack-icon,a.youtube-icon,a.tiktok-icon{display:inline-flex;flex-shrink:0;line-height:0}"
@@ -82,29 +89,41 @@ _TIKTOK_A = (
     f'<path fill="#000" d="{_TIKTOK_PATH}"/>'
     "</svg></a>"
 )
+_X_A = (
+    f'<a class="x-icon" href="{X_HREF}" target="_blank" rel="noopener" aria-label="TwoSnipped on X">'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">'
+    '<path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.995-9.17L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>'
+    "</svg></a>"
+)
 SLACK_ICON_MARKUP = (
-    f'<div class="ynwa-title"><h1>YNWA</h1>{_SLACK_A}{_YOUTUBE_A}{_TIKTOK_A}</div>'
+    f'<div class="ynwa-title"><h1>YNWA</h1>{_SLACK_A}{_YOUTUBE_A}{_TIKTOK_A}{_X_A}</div>'
 )
 _H1_YNWA = re.compile(r"<h1>\s*YNWA\s*</h1>")
 _SLACK_ANCHOR = re.compile(r'<a class="slack-icon"[^>]*>.*?</a>', re.S)
 _YOUTUBE_ANCHOR = re.compile(r'<a class="youtube-icon"[^>]*>.*?</a>', re.S)
+_TIKTOK_ANCHOR = re.compile(r'<a class="tiktok-icon"[^>]*>.*?</a>', re.S)
 
 
 def ensure_slack_icon(text: str) -> str:
-    """Place Slack, YouTube, and TikTok icons to the right of the YNWA title. Idempotent."""
+    """Place Slack, YouTube, TikTok, and X icons to the right of the YNWA title. Idempotent."""
     if _H1_YNWA.search(text) and 'class="ynwa-title"' not in text and "class='ynwa-title'" not in text:
         text = _H1_YNWA.sub(SLACK_ICON_MARKUP, text, count=1)
     if 'class="ynwa-title"' in text or "class='ynwa-title'" in text:
         if _OLD_SLACK_ICON_CSS in text:
             text = text.replace(_OLD_SLACK_ICON_CSS, SLACK_ICON_CSS, 1)
+        elif _OLD_THREE_ICON_CSS in text:
+            text = text.replace(_OLD_THREE_ICON_CSS, SLACK_ICON_CSS, 1)
         if "ynwa-title{" not in text and "</style>" in text:
             text = text.replace("</style>", SLACK_ICON_CSS + "</style>", 1)
-        if "youtube-icon" not in text:
+        if 'class="youtube-icon"' not in text and "class='youtube-icon'" not in text:
             if _SLACK_ANCHOR.search(text):
-                text = _SLACK_ANCHOR.sub(lambda m: m.group(0) + _YOUTUBE_A + _TIKTOK_A, text, count=1)
-        elif "tiktok-icon" not in text:
+                text = _SLACK_ANCHOR.sub(lambda m: m.group(0) + _YOUTUBE_A + _TIKTOK_A + _X_A, text, count=1)
+        elif 'class="tiktok-icon"' not in text and "class='tiktok-icon'" not in text:
             if _YOUTUBE_ANCHOR.search(text):
-                text = _YOUTUBE_ANCHOR.sub(lambda m: m.group(0) + _TIKTOK_A, text, count=1)
+                text = _YOUTUBE_ANCHOR.sub(lambda m: m.group(0) + _TIKTOK_A + _X_A, text, count=1)
+        elif 'class="x-icon"' not in text and "class='x-icon'" not in text:
+            if _TIKTOK_ANCHOR.search(text):
+                text = _TIKTOK_ANCHOR.sub(lambda m: m.group(0) + _X_A, text, count=1)
     return text
 
 
