@@ -21,6 +21,7 @@ day/2026-11-09.html
 day/2026-11-10.html
 day/2026-11-11.html
 day/2026-11-12.html
+day/2026-11-13.html
 week/2026-W43.html
 week/2026-W44.html
 week/2026-W45.html
@@ -72,6 +73,7 @@ business/day/2026-11-09.html
 business/day/2026-11-10.html
 business/day/2026-11-11.html
 business/day/2026-11-12.html
+business/day/2026-11-13.html
 business/week/2026-W43.html
 business/week/2026-W44.html
 business/week/2026-W45.html
@@ -96,6 +98,7 @@ ai-tech/day/2026-11-09.html
 ai-tech/day/2026-11-10.html
 ai-tech/day/2026-11-11.html
 ai-tech/day/2026-11-12.html
+ai-tech/day/2026-11-13.html
 ai-tech/week/2026-W43.html
 ai-tech/week/2026-W44.html
 ai-tech/week/2026-W45.html
@@ -861,6 +864,11 @@ item/2026-11-12-world-1.html
 item/2026-11-12-world-2.html
 item/2026-11-12-world-3.html
 item/2026-11-12-world-4.html
+item/2026-11-13-am-1.html
+item/2026-11-13-am-2.html
+item/2026-11-13-am-3.html
+item/2026-11-13-am-4.html
+item/2026-11-13-am-5.html
 search/
 zh-hant/index.html
 zh-hant/day/2026-10-21.html
@@ -885,6 +893,7 @@ zh-hant/day/2026-11-09.html
 zh-hant/day/2026-11-10.html
 zh-hant/day/2026-11-11.html
 zh-hant/day/2026-11-12.html
+zh-hant/day/2026-11-13.html
 zh-hant/week/2026-W43.html
 zh-hant/week/2026-W44.html
 zh-hant/week/2026-W45.html
@@ -936,6 +945,7 @@ zh-hant/business/day/2026-11-09.html
 zh-hant/business/day/2026-11-10.html
 zh-hant/business/day/2026-11-11.html
 zh-hant/business/day/2026-11-12.html
+zh-hant/business/day/2026-11-13.html
 zh-hant/business/week/2026-W43.html
 zh-hant/business/week/2026-W44.html
 zh-hant/business/week/2026-W45.html
@@ -960,6 +970,7 @@ zh-hant/ai-tech/day/2026-11-09.html
 zh-hant/ai-tech/day/2026-11-10.html
 zh-hant/ai-tech/day/2026-11-11.html
 zh-hant/ai-tech/day/2026-11-12.html
+zh-hant/ai-tech/day/2026-11-13.html
 zh-hant/ai-tech/week/2026-W43.html
 zh-hant/ai-tech/week/2026-W44.html
 zh-hant/ai-tech/week/2026-W45.html
@@ -1725,6 +1736,11 @@ zh-hant/item/2026-11-12-world-1.html
 zh-hant/item/2026-11-12-world-2.html
 zh-hant/item/2026-11-12-world-3.html
 zh-hant/item/2026-11-12-world-4.html
+zh-hant/item/2026-11-13-am-1.html
+zh-hant/item/2026-11-13-am-2.html
+zh-hant/item/2026-11-13-am-3.html
+zh-hant/item/2026-11-13-am-4.html
+zh-hant/item/2026-11-13-am-5.html
 zh-hant/search/
 zh-hans/index.html
 zh-hans/day/2026-10-21.html
@@ -1749,6 +1765,7 @@ zh-hans/day/2026-11-09.html
 zh-hans/day/2026-11-10.html
 zh-hans/day/2026-11-11.html
 zh-hans/day/2026-11-12.html
+zh-hans/day/2026-11-13.html
 zh-hans/week/2026-W43.html
 zh-hans/week/2026-W44.html
 zh-hans/week/2026-W45.html
@@ -1800,6 +1817,7 @@ zh-hans/business/day/2026-11-09.html
 zh-hans/business/day/2026-11-10.html
 zh-hans/business/day/2026-11-11.html
 zh-hans/business/day/2026-11-12.html
+zh-hans/business/day/2026-11-13.html
 zh-hans/business/week/2026-W43.html
 zh-hans/business/week/2026-W44.html
 zh-hans/business/week/2026-W45.html
@@ -1824,6 +1842,7 @@ zh-hans/ai-tech/day/2026-11-09.html
 zh-hans/ai-tech/day/2026-11-10.html
 zh-hans/ai-tech/day/2026-11-11.html
 zh-hans/ai-tech/day/2026-11-12.html
+zh-hans/ai-tech/day/2026-11-13.html
 zh-hans/ai-tech/week/2026-W43.html
 zh-hans/ai-tech/week/2026-W44.html
 zh-hans/ai-tech/week/2026-W45.html
@@ -2589,4 +2608,9 @@ zh-hans/item/2026-11-12-world-1.html
 zh-hans/item/2026-11-12-world-2.html
 zh-hans/item/2026-11-12-world-3.html
 zh-hans/item/2026-11-12-world-4.html
+zh-hans/item/2026-11-13-am-1.html
+zh-hans/item/2026-11-13-am-2.html
+zh-hans/item/2026-11-13-am-3.html
+zh-hans/item/2026-11-13-am-4.html
+zh-hans/item/2026-11-13-am-5.html
 zh-hans/search/
