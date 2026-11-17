@@ -39,7 +39,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.theme-tg'))return;c
    build.py renders the build-time order; this redoes it on load and after app.js re-renders #view, as stories age out. */
 (()=>{const run=()=>{const box=document.querySelector('.lblocks[data-win]');if(!box)return;const W=+box.dataset.win,n=Date.now()/1e3;
   const live=t=>t&&n-t<W?t:0;
-  const key=s=>s.classList.contains('wkend')?live(+s.dataset.exp):Math.max(0,...[...s.querySelectorAll('[data-exp]')].map(c=>live(+c.dataset.exp)));
+  const key=s=>s.classList.contains('dgst')?+s.dataset.ord:s.classList.contains('wkend')?live(+s.dataset.exp):Math.max(0,...[...s.querySelectorAll('[data-exp]')].map(c=>live(+c.dataset.exp)));
   const all=[...box.children].filter(s=>s.classList.contains('lsec')),k=new Map(all.map((s,i)=>[s,{t:key(s),i}]));
   const want=all.slice().sort((a,b)=>{const x=k.get(a),y=k.get(b);if(!x.t!==!y.t)return x.t?-1:1;if(x.t&&y.t&&x.t!==y.t)return y.t-x.t;
     if(!x.t&&!y.t)return (a.dataset.i??99)-(b.dataset.i??99)||x.i-y.i;return x.i-y.i});
